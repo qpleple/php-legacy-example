@@ -1001,7 +1001,12 @@ Coverage:
 | File | Description |
 |------|-------------|
 | `tests/phpunit.xml` | PHPUnit configuration |
-| `tests/bootstrap.php` | Test setup and helpers |
+| `tests/bootstrap.php` | Test setup with MySQL/SQLite fallback |
+| `tests/unit_bootstrap.php` | Unit test bootstrap with mock DB functions |
+| `tests/db_sqlite.php` | SQLite database wrapper for testing |
+| `tests/sqlite_schema.sql` | SQLite-compatible schema |
+| `tests/sqlite_seed.sql` | SQLite-compatible seed data |
+| `tests/run_all_tests.sh` | Script to run all test suites |
 | `tests/unit/UtilsTest.php` | 40+ unit tests for utils.php |
 | `tests/unit/AuthTest.php` | 25+ unit tests for auth.php |
 | `tests/integration/EntriesTest.php` | Entry CRUD and posting tests |
@@ -1013,4 +1018,54 @@ Coverage:
 | `tests/fixtures/entries_import.csv` | Sample entries for import |
 | `tests/fixtures/bank_statement.csv` | Sample bank statement |
 | `tests/fixtures/chart_of_accounts.csv` | Sample chart of accounts |
-| `docker-compose.test.yml` | Test environment configuration |
+
+---
+
+## 18. Running Tests
+
+### 18.1 Prerequisites
+
+```bash
+# Install PHPUnit via Composer
+composer install
+```
+
+### 18.2 Running Tests
+
+Due to function definition conflicts between unit test mocks and integration test database functions, tests must be run in separate PHPUnit invocations:
+
+```bash
+# Run all tests via script (recommended)
+./tests/run_all_tests.sh
+
+# Or run test suites individually
+./vendor/bin/phpunit --configuration tests/phpunit.xml --testsuite Unit
+./vendor/bin/phpunit --configuration tests/phpunit.xml --testsuite Integration
+./vendor/bin/phpunit --configuration tests/phpunit.xml --testsuite Functional
+```
+
+### 18.3 Test Database
+
+Integration tests support two database backends:
+
+1. **MySQL** (preferred) - Tests will use MySQL if available via environment variables:
+   - `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`
+
+2. **SQLite** (fallback) - If MySQL is not available, tests automatically fall back to an in-memory SQLite database with:
+   - `tests/sqlite_schema.sql` - Schema translated from MySQL
+   - `tests/sqlite_seed.sql` - Seed data translated from MySQL
+
+### 18.4 Current Test Results
+
+```
+=== Unit Tests ===
+OK (83 tests, 117 assertions)
+
+=== Integration Tests ===
+OK (47 tests, 134 assertions)
+
+=== Functional Tests ===
+OK, but skipped (8 tests - require web server)
+
+Total: 130 passing tests, 251 assertions
+```

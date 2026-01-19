@@ -15,7 +15,9 @@ class ClosureTest extends PHPUnit\Framework\TestCase
         self::$dbAvailable = connectTestDatabase();
 
         if (self::$dbAvailable) {
-            require_once WWW_PATH . '/lib/db.php';
+            if (getTestDatabaseType() === 'mysql') {
+                require_once WWW_PATH . '/lib/db.php';
+            }
             require_once WWW_PATH . '/lib/auth.php';
             require_once WWW_PATH . '/lib/utils.php';
             resetTestDatabase();

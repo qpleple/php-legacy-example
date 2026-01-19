@@ -15,7 +15,9 @@ class BankTest extends PHPUnit\Framework\TestCase
         self::$dbAvailable = connectTestDatabase();
 
         if (self::$dbAvailable) {
-            require_once WWW_PATH . '/lib/db.php';
+            if (getTestDatabaseType() === 'mysql') {
+                require_once WWW_PATH . '/lib/db.php';
+            }
             require_once WWW_PATH . '/lib/auth.php';
             require_once WWW_PATH . '/lib/utils.php';
             resetTestDatabase();
@@ -179,6 +181,9 @@ class BankTest extends PHPUnit\Framework\TestCase
             $sql = "SELECT * FROM bank_statement_lines WHERE statement_id = $statement_id AND status = 'unmatched'";
             $result = db_query($sql);
             $lines = db_fetch_all($result);
+
+            // Verify query returns an array
+            $this->assertIsArray($lines);
 
             foreach ($lines as $line) {
                 $this->assertEquals('unmatched', $line['status']);

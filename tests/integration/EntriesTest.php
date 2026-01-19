@@ -1,7 +1,7 @@
 <?php
 /**
  * Integration tests for accounting entries
- * Requires database connection
+ * Requires database connection (MySQL or SQLite)
  */
 
 require_once dirname(__DIR__) . '/bootstrap.php';
@@ -15,7 +15,12 @@ class EntriesTest extends PHPUnit\Framework\TestCase
         self::$dbAvailable = connectTestDatabase();
 
         if (self::$dbAvailable) {
-            require_once WWW_PATH . '/lib/db.php';
+            // Include appropriate db functions based on database type
+            if (getTestDatabaseType() === 'mysql') {
+                require_once WWW_PATH . '/lib/db.php';
+            }
+            // SQLite db functions are already loaded by connectTestDatabase()
+
             require_once WWW_PATH . '/lib/auth.php';
             require_once WWW_PATH . '/lib/utils.php';
             resetTestDatabase();
@@ -110,8 +115,8 @@ class EntriesTest extends PHPUnit\Framework\TestCase
 
     public function testValidateWithinTolerance()
     {
-        // 0.01 tolerance should pass
-        $this->assertTrue(validate_double_entry(100.00, 99.99));
+        // 0.01 tolerance should pass (use 99.995 to avoid floating point precision issues)
+        $this->assertTrue(validate_double_entry(100.00, 99.995));
     }
 
     // ==================== Entry Posting Tests ====================

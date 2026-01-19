@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="bootstrap.php" colors="true" stopOnFailure="false">
     <testsuites>
-        <testsuite name="Unit">
-            <directory>unit</directory>
-        </testsuite>
+        <!-- Integration tests must run first to define real db functions -->
         <testsuite name="Integration">
             <directory>integration</directory>
+        </testsuite>
+        <testsuite name="Unit">
+            <directory>unit</directory>
         </testsuite>
         <testsuite name="Functional">
             <directory>functional</directory>

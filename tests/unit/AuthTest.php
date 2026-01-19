@@ -4,34 +4,9 @@
  * Tests functions that don't require database connection
  */
 
-require_once dirname(__DIR__) . '/bootstrap.php';
+require_once dirname(__DIR__) . '/unit_bootstrap.php';
 
-// Define mock db functions before including auth.php
-if (!function_exists('db_escape')) {
-    function db_escape($value) {
-        return addslashes($value);
-    }
-}
-
-if (!function_exists('db_query')) {
-    function db_query($sql) {
-        return false;
-    }
-}
-
-if (!function_exists('db_num_rows')) {
-    function db_num_rows($result) {
-        return 0;
-    }
-}
-
-if (!function_exists('db_fetch_assoc')) {
-    function db_fetch_assoc($result) {
-        return null;
-    }
-}
-
-// Include auth after mocks
+// Include auth after bootstrap (which provides mock db functions if needed)
 require_once WWW_PATH . '/lib/auth.php';
 
 class AuthTest extends PHPUnit\Framework\TestCase

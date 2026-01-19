@@ -3,49 +3,10 @@
  * Unit tests for utils.php functions
  */
 
-// Include required files
-require_once dirname(__DIR__) . '/bootstrap.php';
+// Include unit bootstrap which provides mock db functions
+require_once dirname(__DIR__) . '/unit_bootstrap.php';
 
-// Define mock functions for dependencies
-if (!function_exists('auth_start_session')) {
-    function auth_start_session() {
-        if (session_status() === PHP_SESSION_NONE) {
-            @session_start();
-        }
-    }
-}
-
-if (!function_exists('db_escape')) {
-    function db_escape($value) {
-        return addslashes($value);
-    }
-}
-
-if (!function_exists('db_query')) {
-    function db_query($sql) {
-        return false; // Mock - won't be used in pure unit tests
-    }
-}
-
-if (!function_exists('db_fetch_all')) {
-    function db_fetch_all($result) {
-        return [];
-    }
-}
-
-if (!function_exists('db_num_rows')) {
-    function db_num_rows($result) {
-        return 0;
-    }
-}
-
-if (!function_exists('db_fetch_assoc')) {
-    function db_fetch_assoc($result) {
-        return null;
-    }
-}
-
-// Include utils after mocks
+// Include utils after bootstrap
 require_once WWW_PATH . '/lib/utils.php';
 
 class UtilsTest extends PHPUnit\Framework\TestCase
