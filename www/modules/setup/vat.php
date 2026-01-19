@@ -3,13 +3,16 @@
  * VAT rates management - Legacy style
  */
 
-$page_title = 'Taux de TVA';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('admin');
 
 // Handle delete
 if (is_post() && post('action') === 'delete') {
-    require_csrf();
+    csrf_verify();
     $id = intval(post('id'));
 
     // Check if VAT rate is used
@@ -27,7 +30,7 @@ if (is_post() && post('action') === 'delete') {
 
 // Handle create/update
 if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
-    require_csrf();
+    csrf_verify();
 
     $id = intval(post('id'));
     $label = db_escape(trim(post('label')));
@@ -66,7 +69,7 @@ if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
 
 // Toggle active status
 if (is_post() && post('action') === 'toggle') {
-    require_csrf();
+    csrf_verify();
     $id = intval(post('id'));
 
     $sql = "UPDATE vat_rates SET is_active = NOT is_active WHERE id = $id";
@@ -91,6 +94,9 @@ if (get('edit')) {
         $edit_vat = db_fetch_assoc($result);
     }
 }
+
+$page_title = 'Taux de TVA';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Gestion des Taux de TVA</h2>

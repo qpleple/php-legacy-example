@@ -116,6 +116,11 @@ $pdf->Cell(30, 6, 'Solde', 1, 1, 'C', true);
 $pdf->SetFont('Arial', '', 8);
 $pdf->SetTextColor(0);
 
+if (empty($vat_data)) {
+    $pdf->SetFont('Arial', 'I', 9);
+    $pdf->Cell(180, 6, utf8_decode('Aucune donnée TVA pour la période sélectionnée'), 1, 1, 'C');
+}
+
 foreach ($vat_data as $vd) {
     $pdf->Cell(30, 5, utf8_decode($vd['label']), 1, 0, 'L');
     $pdf->Cell(30, 5, number_format($vd['base_collected'], 2, ',', ' '), 1, 0, 'R');

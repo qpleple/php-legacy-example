@@ -3,15 +3,18 @@
  * Periods management page - Legacy style
  */
 
-$page_title = 'Gestion des Periodes';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('admin');
 
 $company = get_company();
 
 // Handle generate periods
 if (is_post() && post('action') === 'generate') {
-    require_csrf();
+    csrf_verify();
 
     if (!$company) {
         set_flash('error', 'Configurez d\'abord la societe.');
@@ -57,7 +60,7 @@ if (is_post() && post('action') === 'generate') {
 
 // Handle lock/unlock period
 if (is_post() && (post('action') === 'lock' || post('action') === 'unlock')) {
-    require_csrf();
+    csrf_verify();
 
     $period_id = intval(post('period_id'));
     $new_status = post('action') === 'lock' ? 'locked' : 'open';
@@ -82,6 +85,9 @@ if (is_post() && (post('action') === 'lock' || post('action') === 'unlock')) {
 
 // Get all periods
 $periods = get_periods();
+
+$page_title = 'Gestion des Periodes';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Gestion des Periodes</h2>

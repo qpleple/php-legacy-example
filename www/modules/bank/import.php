@@ -3,8 +3,11 @@
  * Bank statement import - Legacy style
  */
 
-$page_title = 'Import Releve Bancaire';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('accountant');
 
 // Get bank accounts
@@ -14,7 +17,7 @@ $bank_accounts = db_fetch_all(db_query($sql));
 $import_results = null;
 
 if (is_post()) {
-    require_csrf();
+    csrf_verify();
 
     $bank_account_id = intval(post('bank_account_id'));
 
@@ -75,6 +78,9 @@ if (is_post()) {
         );
     }
 }
+
+$page_title = 'Import Releve Bancaire';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Import Releve Bancaire</h2>

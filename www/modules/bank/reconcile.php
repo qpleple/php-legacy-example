@@ -3,8 +3,11 @@
  * Bank reconciliation page - Legacy style
  */
 
-$page_title = 'Rapprochement Bancaire';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('accountant');
 
 $statement_id = intval(get('statement_id', 0));
@@ -13,7 +16,7 @@ $bank_account = null;
 
 // Handle matching
 if (is_post() && post('action') === 'match') {
-    require_csrf();
+    csrf_verify();
 
     $line_id = intval(post('line_id'));
     $entry_line_id = intval(post('entry_line_id'));
@@ -31,7 +34,7 @@ if (is_post() && post('action') === 'match') {
 
 // Handle unmatch
 if (is_post() && post('action') === 'unmatch') {
-    require_csrf();
+    csrf_verify();
 
     $line_id = intval(post('line_id'));
 
@@ -62,6 +65,9 @@ $sql = "SELECT bs.*, ba.label as bank_label
         LEFT JOIN bank_accounts ba ON bs.bank_account_id = ba.id
         ORDER BY bs.imported_at DESC";
 $statements = db_fetch_all(db_query($sql));
+
+$page_title = 'Rapprochement Bancaire';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Rapprochement Bancaire</h2>

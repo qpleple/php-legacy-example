@@ -79,6 +79,11 @@ $pdf->SetFont('Arial', '', 8);
 $pdf->SetTextColor(0);
 $fill = false;
 
+if (empty($balance)) {
+    $pdf->SetFont('Arial', 'I', 9);
+    $pdf->Cell(188, 6, utf8_decode('Aucune écriture trouvée'), 1, 1, 'C');
+}
+
 foreach ($balance as $row) {
     $pdf->SetFillColor(245, 245, 245);
 

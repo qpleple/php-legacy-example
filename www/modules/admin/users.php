@@ -3,15 +3,18 @@
  * User management page - Legacy style
  */
 
-$page_title = 'Gestion Utilisateurs';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('admin');
 
 $current_user_id = auth_user_id();
 
 // Handle delete
 if (is_post() && post('action') === 'delete') {
-    require_csrf();
+    csrf_verify();
     $id = intval(post('id'));
 
     if ($id === $current_user_id) {
@@ -33,7 +36,7 @@ if (is_post() && post('action') === 'delete') {
 
 // Handle create/update
 if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
-    require_csrf();
+    csrf_verify();
 
     $id = intval(post('id'));
     $username = db_escape(trim(post('username')));
@@ -105,6 +108,9 @@ if (get('edit')) {
         $edit_user = db_fetch_assoc($result);
     }
 }
+
+$page_title = 'Gestion Utilisateurs';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Gestion des Utilisateurs</h2>

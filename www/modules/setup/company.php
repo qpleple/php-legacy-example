@@ -3,13 +3,16 @@
  * Company settings page - Legacy style
  */
 
-$page_title = 'Parametrage Societe';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('admin');
 
 // Handle form submission
 if (is_post()) {
-    require_csrf();
+    csrf_verify();
 
     $name = db_escape(trim(post('name')));
     $currency = db_escape(trim(post('currency')));
@@ -69,6 +72,9 @@ if (!$company) {
         'carry_forward_account' => '110000'
     );
 }
+
+$page_title = 'Parametrage Societe';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Parametrage de la Societe</h2>

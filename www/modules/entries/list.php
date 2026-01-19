@@ -3,13 +3,16 @@
  * Entries list page - Legacy style
  */
 
-$page_title = 'Liste des Pieces';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('accountant');
 
 // Handle delete draft
 if (is_post() && post('action') === 'delete') {
-    require_csrf();
+    csrf_verify();
     $id = intval(post('id'));
 
     // Only delete drafts
@@ -31,7 +34,7 @@ if (is_post() && post('action') === 'delete') {
 
 // Handle duplicate
 if (is_post() && post('action') === 'duplicate') {
-    require_csrf();
+    csrf_verify();
     $id = intval(post('id'));
 
     // Get original entry
@@ -124,6 +127,9 @@ $entries = db_fetch_all(db_query($sql));
 // Get journals and periods for filters
 $journals = get_journals();
 $periods = get_periods();
+
+$page_title = 'Liste des Pieces';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Liste des Pieces Comptables</h2>

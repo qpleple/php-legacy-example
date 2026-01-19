@@ -81,6 +81,12 @@ $pdf->SetFont('Arial', '', 9);
 $pdf->Cell(0, 5, utf8_decode('Imprimé le ' . date('d/m/Y H:i')), 0, 1, 'C');
 $pdf->Ln(5);
 
+if (empty($ledger)) {
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('Arial', 'I', 10);
+    $pdf->Cell(0, 10, utf8_decode('Aucune écriture trouvée pour les critères sélectionnés.'), 0, 1, 'C');
+}
+
 foreach ($ledger as $acc) {
     // Check if we need a new page
     if ($pdf->GetY() > 250) {

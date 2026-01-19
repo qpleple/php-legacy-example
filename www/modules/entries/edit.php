@@ -3,9 +3,14 @@
  * Entry create/edit page - Legacy style
  */
 
-$page_title = 'Saisie Ecriture';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('accountant');
+
+$page_title = 'Saisie Ecriture';
 
 $entry_id = intval(get('id', 0));
 $entry = null;
@@ -47,7 +52,7 @@ if ($entry_id > 0) {
 
 // Handle form submission
 if (is_post() && !$is_readonly) {
-    require_csrf();
+    csrf_verify();
     $action = post('action');
 
     $journal_id = intval(post('journal_id'));
@@ -199,7 +204,7 @@ if (is_post() && !$is_readonly) {
 
 // Handle attachment delete
 if (is_post() && post('action') === 'delete_attachment' && !$is_readonly) {
-    require_csrf();
+    csrf_verify();
     $att_id = intval(post('attachment_id'));
     $sql = "SELECT stored_path FROM attachments WHERE id = $att_id AND entry_id = $entry_id";
     $result = db_query($sql);
@@ -217,6 +222,8 @@ $journals = get_journals();
 $accounts = get_accounts();
 $third_parties = get_third_parties();
 $vat_rates = get_vat_rates();
+
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2><?php echo $page_title; ?></h2>

@@ -3,13 +3,16 @@
  * Period locking page - Legacy style
  */
 
-$page_title = 'Verrouillage des Periodes';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('admin');
 
 // Handle lock/unlock
 if (is_post()) {
-    require_csrf();
+    csrf_verify();
 
     $period_id = intval(post('period_id'));
     $action = post('action');
@@ -54,6 +57,9 @@ foreach ($periods as $p) {
     if ($p['status'] === 'open') $open_count++;
     else $locked_count++;
 }
+
+$page_title = 'Verrouillage des Periodes';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Verrouillage des Periodes</h2>

@@ -61,6 +61,11 @@ $grand_debit = 0;
 $grand_credit = 0;
 $current_journal = '';
 
+if (empty($entries)) {
+    $pdf->SetFont('Arial', 'I', 10);
+    $pdf->Cell(0, 10, utf8_decode('Aucune écriture trouvée pour les critères sélectionnés.'), 0, 1, 'C');
+}
+
 foreach ($entries as $entry) {
     // Journal header
     if ($entry['journal_code'] !== $current_journal) {

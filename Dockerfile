@@ -14,7 +14,7 @@ WORKDIR /var/www/html
 # Configure PHP
 RUN echo "short_open_tag = On" >> /usr/local/etc/php/php.ini && \
     echo "display_errors = On" >> /usr/local/etc/php/php.ini && \
-    echo "error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED" >> /usr/local/etc/php/php.ini && \
+    echo "error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_WARNING" >> /usr/local/etc/php/php.ini && \
     echo "upload_max_filesize = 10M" >> /usr/local/etc/php/php.ini && \
     echo "post_max_size = 10M" >> /usr/local/etc/php/php.ini
 

@@ -3,8 +3,11 @@
  * Lettering page - Legacy style
  */
 
-$page_title = 'Lettrage';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('accountant');
 
 $third_party_id = intval(get('third_party_id', 0));
@@ -39,7 +42,7 @@ if ($account_id == 0) {
 
 // Handle create lettering group
 if (is_post() && post('action') === 'create_lettering') {
-    require_csrf();
+    csrf_verify();
 
     $selected_lines = isset($_POST['lines']) ? $_POST['lines'] : array();
 
@@ -95,7 +98,7 @@ if (is_post() && post('action') === 'create_lettering') {
 
 // Handle delete lettering group
 if (is_post() && post('action') === 'delete_lettering') {
-    require_csrf();
+    csrf_verify();
 
     $group_id = intval(post('group_id'));
 
@@ -136,6 +139,9 @@ $sql = "SELECT lg.*, u.username as created_by_name,
         WHERE lg.account_id = $account_id
         ORDER BY lg.created_at DESC";
 $lettering_groups = db_fetch_all(db_query($sql));
+
+$page_title = 'Lettrage';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Lettrage</h2>

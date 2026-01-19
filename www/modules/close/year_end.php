@@ -3,8 +3,11 @@
  * Year-end closing page - Legacy style
  */
 
-$page_title = 'Cloture Annuelle';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('admin');
 
 $company = get_company();
@@ -38,7 +41,7 @@ $can_close = count($errors) === 0;
 
 // Handle year-end closing
 if (is_post() && post('action') === 'close_year') {
-    require_csrf();
+    csrf_verify();
 
     if (!$can_close) {
         set_flash('error', 'Les conditions de cloture ne sont pas remplies.');
@@ -156,6 +159,9 @@ foreach ($balance_preview as $bal) {
     if ($bal['balance'] > 0) $total_debit_preview += $bal['balance'];
     else $total_credit_preview += abs($bal['balance']);
 }
+
+$page_title = 'Cloture Annuelle';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Cloture Annuelle</h2>

@@ -3,14 +3,17 @@
  * CSV Import page - Legacy style
  */
 
-$page_title = 'Import CSV Ecritures';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('accountant');
 
 $import_results = null;
 
 if (is_post()) {
-    require_csrf();
+    csrf_verify();
 
     if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
         set_flash('error', 'Erreur lors de l\'upload du fichier.');
@@ -182,6 +185,9 @@ if (is_post()) {
         );
     }
 }
+
+$page_title = 'Import CSV Ecritures';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Import CSV Ecritures</h2>

@@ -3,13 +3,16 @@
  * Third parties management (customers/vendors) - Legacy style
  */
 
-$page_title = 'Gestion des Tiers';
-require_once __DIR__ . '/../../header.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/utils.php';
+
+require_login();
 require_role('accountant');
 
 // Handle delete
 if (is_post() && post('action') === 'delete') {
-    require_csrf();
+    csrf_verify();
     $id = intval(post('id'));
 
     // Check if third party is used
@@ -27,7 +30,7 @@ if (is_post() && post('action') === 'delete') {
 
 // Handle create/update
 if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
-    require_csrf();
+    csrf_verify();
 
     $id = intval(post('id'));
     $type = db_escape(post('type'));
@@ -125,6 +128,9 @@ if (get('edit')) {
         $edit_tp = db_fetch_assoc($result);
     }
 }
+
+$page_title = 'Gestion des Tiers';
+require_once __DIR__ . '/../../header.php';
 ?>
 
 <h2>Gestion des Tiers</h2>
