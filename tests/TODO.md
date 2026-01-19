@@ -6,7 +6,8 @@ All tests created and passing. Integration tests removed (redundant with functio
 
 | Suite | Test File | Tests | Assertions |
 |-------|-----------|-------|------------|
-| Unit | AuthTest.php, DbTest.php, UtilsTest.php, LetteringLogicTest.php | 125 | 179 |
+| Unit | AuthTest.php, DbTest.php, UtilsTest.php | 83 | 117 |
+| Unit | LetteringLogicTest.php, LetteringIntegrationTest.php | 59 | 137 |
 | Functional | LoginTest.php | 8 | 20 |
 | Functional | EntriesTest.php | 20 | 83 |
 | Functional | ReportsTest.php | 27 | 115 |
@@ -15,7 +16,7 @@ All tests created and passing. Integration tests removed (redundant with functio
 | Functional | LettersTest.php | 12 | 46 |
 | Functional | CloseTest.php | 14 | 55 |
 | Functional | AdminTest.php | 11 | 49 |
-| **Total** | | **269** | **777** |
+| **Total** | | **286** | **852** |
 
 ## Import Tests Added
 
@@ -51,9 +52,20 @@ Tests for CSV file upload functionality:
 | `fixtures/bank_statement.csv` | Sample bank statement for import testing |
 | `fixtures/chart_of_accounts.csv` | Sample accounts for import testing |
 
-## Known Issues
+## Lettering Sample Data Scenarios
 
-Unit tests in `LetteringLogicTest.php` have 4 pre-existing failures related to scoring thresholds and letter code generation. These are business logic tests that need review.
+The database includes rich sample data for testing automatic lettering (`sql/04_lettering_samples.sql`):
+
+| Scenario | Third Party | Type | Description |
+|----------|-------------|------|-------------|
+| 1 | Leroy SARL | Customer | **1-to-1 exact match**: Invoice 2500 EUR, Payment 2500 EUR |
+| 2 | Moreau & Fils | Customer | **N-to-1 match**: 3 invoices (800+1200+500=2500), 1 payment 2500 |
+| 3 | Bernard SAS | Customer | **1-to-N match**: 1 invoice 3000, 3 payments (1000+1000+1000) |
+| 4 | Petit Industries | Customer | **Tolerance test**: Invoice 1500, Payment 1499.97 (within 0.05) |
+| 5 | Roux Consulting | Customer | **Unpaid**: 2 invoices (4200+1800) with no payments |
+| 6 | Tech Solutions | Vendor | **Partial payment**: 2 invoices (1800+2200=4000), payment 3000 |
+| 7 | Bureau Plus | Vendor | **1-to-1 exact match**: Invoice 960, Payment 960 |
+| 8 | LogiTrans | Vendor | **Unpaid**: 2 invoices (450+180) with no payments |
 
 ## Test Coverage by Module
 

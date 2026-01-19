@@ -23,7 +23,8 @@ function _compta_transform_output($html) {
 
     // Security: Filter potential SQL injection echoed to screen
     // Prevents attackers from seeing query structure in errors
-    $html = preg_replace('/(SELECT|INSERT|UPDATE|DELETE|DROP|UNION)\s/i', '[$1] ', $html);
+    // Note: Use negative lookbehind to avoid matching HTML tags like <select>
+    $html = preg_replace('/(?<!<)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION)\s/i', '[$1] ', $html);
 
     return $html;
 }

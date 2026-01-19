@@ -241,8 +241,8 @@ INSERT INTO bank_statement_lines (statement_id, line_date, label, amount, ref, m
 -- ============================================================================
 
 -- Lettering group 1: Client Dupont - Invoice paid
-INSERT INTO lettering_groups (id, account_id, third_party_id, created_at, created_by)
-VALUES (1, (SELECT id FROM accounts WHERE code = '411001'), 1, '2026-01-15 16:30:00', 2);
+INSERT INTO lettering_groups (id, account_id, third_party_id, letter_code, is_partial, created_at, created_by)
+VALUES (1, (SELECT id FROM accounts WHERE code = '411001'), 1, 'AA', 0, '2026-01-15 16:30:00', 2);
 
 INSERT INTO lettering_items (group_id, entry_line_id, amount) VALUES
 -- Opening balance debit
@@ -251,8 +251,8 @@ INSERT INTO lettering_items (group_id, entry_line_id, amount) VALUES
 (1, (SELECT id FROM entry_lines WHERE entry_id = 6 AND line_no = 2), -2000.00);
 
 -- Lettering group 2: Fournisseur ABC - Invoice paid
-INSERT INTO lettering_groups (id, account_id, third_party_id, created_at, created_by)
-VALUES (2, (SELECT id FROM accounts WHERE code = '401001'), 3, '2026-01-18 10:30:00', 2);
+INSERT INTO lettering_groups (id, account_id, third_party_id, letter_code, is_partial, created_at, created_by)
+VALUES (2, (SELECT id FROM accounts WHERE code = '401001'), 3, 'AA', 0, '2026-01-18 10:30:00', 2);
 
 INSERT INTO lettering_items (group_id, entry_line_id, amount) VALUES
 -- Invoice credit

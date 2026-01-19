@@ -27,6 +27,11 @@ if [ ! -f "$DB_PATH" ]; then
         # No echo - triggers are "hidden"
     fi
 
+    if [ -f "$SQL_DIR/04_lettering_samples.sql" ]; then
+        sqlite3 "$DB_PATH" < "$SQL_DIR/04_lettering_samples.sql"
+        echo "Lettering sample data loaded."
+    fi
+
     chown www-data:www-data "$DB_PATH"
     echo "Database initialized at $DB_PATH"
 fi
