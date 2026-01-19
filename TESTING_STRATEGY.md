@@ -6,25 +6,39 @@ This document outlines a comprehensive testing strategy for the legacy PHP accou
 
 ---
 
+## Implementation Progress
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Infrastructure | ✅ Done | PHPUnit config, bootstrap, directory structure |
+| Unit Tests | ✅ Done | `UtilsTest.php`, `AuthTest.php` |
+| Integration Tests | ✅ Done | Entries, Accounts, Bank, Lettering, Closure |
+| Functional Tests | ✅ Done | `LoginTest.php` with HTTP testing |
+| Test Fixtures | ✅ Done | CSV samples for import testing |
+| E2E Tests | ⏳ Pending | Selenium/Playwright workflows |
+| CI/CD Pipeline | ⏳ Pending | GitHub Actions configuration |
+
+---
+
 ## 1. Testing Layers
 
 ### 1.1 Layer Summary
 
-| Layer | Purpose | Tools | Coverage Target |
-|-------|---------|-------|-----------------|
-| **Unit Tests** | Test individual functions in `/lib/` | PHPUnit | 80% of utility functions |
-| **Integration Tests** | Test database operations and module logic | PHPUnit + MySQL | All CRUD operations |
-| **Functional Tests** | Test HTTP endpoints and form submissions | PHPUnit + curl/Guzzle | All pages/routes |
-| **End-to-End Tests** | Test complete user workflows | Selenium/Playwright | Critical business flows |
-| **Acceptance Tests** | Validate against spec criteria (Section 13) | Manual + Automated | 100% of acceptance criteria |
+| Layer | Purpose | Tools | Coverage Target | Status |
+|-------|---------|-------|-----------------|--------|
+| **Unit Tests** | Test individual functions in `/lib/` | PHPUnit | 80% of utility functions | ✅ |
+| **Integration Tests** | Test database operations and module logic | PHPUnit + MySQL | All CRUD operations | ✅ |
+| **Functional Tests** | Test HTTP endpoints and form submissions | PHPUnit + curl/Guzzle | All pages/routes | ✅ |
+| **End-to-End Tests** | Test complete user workflows | Selenium/Playwright | Critical business flows | ⏳ |
+| **Acceptance Tests** | Validate against spec criteria (Section 13) | Manual + Automated | 100% of acceptance criteria | ⏳ |
 
 ---
 
-## 2. Unit Tests
+## 2. Unit Tests ✅
 
 ### 2.1 Target: `/lib/` Functions
 
-#### 2.1.1 `db.php` Functions
+#### 2.1.1 `db.php` Functions ⏳
 ```
 Test Cases:
 - db_connect(): Successful connection with valid credentials
@@ -36,49 +50,48 @@ Test Cases:
 - db_escape(): Escape special characters (', ", \, NULL bytes)
 - db_escape(): Handle empty strings and NULL values
 ```
+📍 Location: Requires database - tested in integration tests
 
-#### 2.1.2 `auth.php` Functions
+#### 2.1.2 `auth.php` Functions ✅
 ```
 Test Cases:
-- auth_login(): Successful login with valid credentials
-- auth_login(): Reject invalid password
-- auth_login(): Reject non-existent user
-- auth_login(): Set session variables correctly (user_id, role, csrf_token)
-- auth_is_logged_in(): Return true when session active
-- auth_is_logged_in(): Return false when no session
-- auth_has_role(): Admin has access to all roles
-- auth_has_role(): Accountant has access to accountant and viewer
-- auth_has_role(): Viewer only has viewer access
-- require_login(): Redirect when not logged in
-- require_role(): Redirect when insufficient permissions
-- csrf_token_generate(): Generate unique tokens
-- csrf_verify(): Accept valid token
-- csrf_verify(): Reject invalid/missing token
-- audit_log(): Insert correct data into audit_log table
+✅ auth_hash_password(): Returns consistent MD5 hash
+✅ auth_verify_password(): Correct password verification
+✅ auth_is_logged_in(): Return true when session active
+✅ auth_is_logged_in(): Return false when no session
+✅ auth_has_role(): Admin has access to all roles
+✅ auth_has_role(): Accountant has access to accountant and viewer
+✅ auth_has_role(): Viewer only has viewer access
+✅ csrf_token(): Generate unique tokens
+✅ csrf_verify(): Accept valid token
+✅ csrf_verify(): Reject invalid/missing token
+⏳ auth_login(): Requires database (integration test)
+⏳ audit_log(): Requires database (integration test)
 ```
+📍 Location: `tests/unit/AuthTest.php`
 
-#### 2.1.3 `utils.php` Functions
+#### 2.1.3 `utils.php` Functions ✅
 ```
 Test Cases:
-- format_money(): Format 1234.56 as "1 234,56" (French format)
-- format_money(): Handle negative amounts
-- format_money(): Handle zero
-- parse_date(): Parse DD/MM/YYYY format
-- parse_date(): Parse YYYY-MM-DD format
-- parse_date(): Reject invalid dates
-- paginate(): Calculate correct offset/limit
-- paginate(): Handle edge cases (page 0, negative page)
-- get_journals(): Return active journals
-- get_accounts(): Return accounts filtered by type
-- get_periods(): Return periods with correct status
-- validate_double_entry(): Accept balanced entries (debit = credit)
-- validate_double_entry(): Reject unbalanced entries
-- validate_double_entry(): Accept within 0.01 tolerance
-- handle_upload(): Accept valid file types (PDF, JPG, PNG, GIF)
-- handle_upload(): Reject PHP files
-- handle_upload(): Enforce 5MB size limit
-- h(): Escape HTML special characters
+✅ format_money(): Format 1234.56 as "1 234,56 EUR"
+✅ format_money(): Handle negative amounts
+✅ format_money(): Handle zero
+✅ parse_date(): Parse DD/MM/YYYY format
+✅ parse_date(): Parse YYYY-MM-DD format
+✅ parse_date(): Reject invalid dates
+✅ parse_number(): Handle French decimal separator
+✅ paginate(): Calculate correct offset/limit
+✅ paginate(): Handle edge cases (page 0, negative page)
+✅ validate_double_entry(): Accept balanced entries
+✅ validate_double_entry(): Reject unbalanced entries
+✅ validate_double_entry(): Accept within 0.01 tolerance
+✅ h(): Escape HTML special characters
+✅ set_flash() / get_flash(): Flash message handling
+⏳ get_journals(): Requires database
+⏳ get_accounts(): Requires database
+⏳ handle_upload(): Requires file system
 ```
+📍 Location: `tests/unit/UtilsTest.php`
 
 ### 2.2 Unit Test Implementation
 
@@ -113,11 +126,11 @@ class UtilsTest extends PHPUnit\Framework\TestCase
 
 ---
 
-## 3. Integration Tests
+## 3. Integration Tests ✅
 
 ### 3.1 Database CRUD Operations
 
-#### 3.1.1 Users Module
+#### 3.1.1 Users Module ⏳
 ```
 Test Cases:
 - Create user with valid data
@@ -129,7 +142,7 @@ Test Cases:
 - Prevent self-deletion
 ```
 
-#### 3.1.2 Company Module
+#### 3.1.2 Company Module ⏳
 ```
 Test Cases:
 - Read company settings (always ID=1)
@@ -138,28 +151,31 @@ Test Cases:
 - Verify currency format
 ```
 
-#### 3.1.3 Periods Module
+#### 3.1.3 Periods Module ✅
 ```
 Test Cases:
-- Generate monthly periods from fiscal year
-- Lock period
-- Unlock period
-- Verify period covers full fiscal year
+✅ Lock period
+✅ Unlock period
+✅ is_period_open() function
+✅ Generate monthly periods from fiscal year
 ```
+📍 Location: `tests/integration/ClosureTest.php`
 
-#### 3.1.4 Accounts Module
+#### 3.1.4 Accounts Module ✅
 ```
 Test Cases:
-- Create account with unique code
-- Create account with duplicate code (should fail)
-- Update account label
-- Deactivate account
-- Search accounts by code
-- Search accounts by label (LIKE)
-- Filter accounts by type (general/customer/vendor)
+✅ Create account with unique code
+✅ Create account with duplicate code (should fail)
+✅ Update account label
+✅ Deactivate account
+✅ Search accounts by code
+✅ Search accounts by label (LIKE)
+✅ Filter accounts by type (general/customer/vendor)
+✅ Get accounts ordered by code
 ```
+📍 Location: `tests/integration/AccountsTest.php`
 
-#### 3.1.5 Journals Module
+#### 3.1.5 Journals Module ⏳
 ```
 Test Cases:
 - Create journal with code
@@ -168,7 +184,7 @@ Test Cases:
 - Get active journals only
 ```
 
-#### 3.1.6 Third Parties Module
+#### 3.1.6 Third Parties Module ⏳
 ```
 Test Cases:
 - Create customer third party
@@ -178,7 +194,7 @@ Test Cases:
 - Update third party email
 ```
 
-#### 3.1.7 VAT Rates Module
+#### 3.1.7 VAT Rates Module ⏳
 ```
 Test Cases:
 - Create VAT rate with collected/deductible accounts
@@ -186,43 +202,65 @@ Test Cases:
 - Activate/deactivate VAT rate
 ```
 
-#### 3.1.8 Entries Module
+#### 3.1.8 Entries Module ✅
 ```
 Test Cases:
-- Create draft entry
-- Add entry lines
-- Delete entry lines (cascade delete pattern)
-- Calculate total debit/credit
-- Save entry with period assignment
-- Post entry (draft → posted)
-- Generate piece_number on posting
-- Prevent modification of posted entry
-- Prevent deletion of posted entry
-- Duplicate entry (create new draft)
+✅ Create draft entry
+✅ Add entry lines
+✅ Delete entry lines (cascade delete pattern)
+✅ Calculate total debit/credit
+✅ Validate balanced entry
+✅ Post entry (draft → posted)
+✅ Generate piece_number on posting
+✅ Piece number format validation
+✅ Piece number sequence increment
+✅ Modify draft entry
+✅ Duplicate entry (create new draft)
+⏳ Prevent modification of posted entry
+⏳ Prevent deletion of posted entry
 ```
+📍 Location: `tests/integration/EntriesTest.php`
 
-#### 3.1.9 Bank Module
+#### 3.1.9 Bank Module ✅
 ```
 Test Cases:
-- Create bank account with 512xxx account link
-- Import bank statement CSV
-- Create bank statement lines
-- Match statement line to entry line
-- Update matched status
-- Calculate reconciliation difference
+✅ Create bank account with 512xxx account link
+✅ Import bank statement
+✅ Create bank statement lines
+✅ Match statement line to entry line
+✅ Update matched status
+✅ Query unmatched lines
+✅ Amount parsing (French format)
 ```
+📍 Location: `tests/integration/BankTest.php`
 
-#### 3.1.10 Lettering Module
+#### 3.1.10 Lettering Module ✅
 ```
 Test Cases:
-- Create lettering group
-- Add lettering items (entry lines)
-- Validate balanced lettering (sum = 0 within 0.01)
-- Reject unbalanced lettering
-- Query unlettered lines for account
+✅ Create lettering group
+✅ Add lettering items (entry lines)
+✅ Validate balanced lettering (sum = 0)
+✅ Validate within 0.01 tolerance
+✅ Reject unbalanced lettering
+✅ Query unlettered lines for account
+✅ Partial lettering
 ```
+📍 Location: `tests/integration/LetteringTest.php`
 
-#### 3.1.11 Audit Log
+#### 3.1.11 Closure Module ✅
+```
+Test Cases:
+✅ Lock period
+✅ Unlock period
+✅ Check for draft entries before lock
+✅ Calculate account balances for year-end
+✅ All periods locked check
+✅ No draft entries check
+✅ Generate monthly periods
+```
+📍 Location: `tests/integration/ClosureTest.php`
+
+#### 3.1.12 Audit Log ⏳
 ```
 Test Cases:
 - Log login action
@@ -234,19 +272,22 @@ Test Cases:
 
 ---
 
-## 4. Functional Tests (HTTP/Form Tests)
+## 4. Functional Tests (HTTP/Form Tests) ✅
 
-### 4.1 Authentication Endpoints
+### 4.1 Authentication Endpoints ✅
 
 ```
 Test Cases:
-- GET /login.php: Display login form
-- POST /login.php with valid credentials: Redirect to index.php
-- POST /login.php with invalid credentials: Show error message
-- POST /login.php without CSRF token: Reject request
-- GET /logout.php: Destroy session and redirect to login
-- Access protected page without session: Redirect to login
+✅ GET /login.php: Display login form
+✅ Login page contains CSRF token
+✅ POST /login.php with valid credentials: Redirect to index.php
+✅ POST /login.php with invalid credentials: Show error
+✅ POST /login.php without CSRF token: Reject request
+✅ GET /logout.php: Destroy session and redirect to login
+✅ Access protected page without session: Redirect to login
+✅ Dashboard redirects to login when not authenticated
 ```
+📍 Location: `tests/functional/LoginTest.php`
 
 ### 4.2 Setup Module Endpoints
 
@@ -583,6 +624,16 @@ For E2E Tests:
 - Entry import CSV samples
 ```
 
+### 7.3 Test Fixtures ✅
+
+The following CSV fixtures have been created for import testing:
+
+| File | Description | Status |
+|------|-------------|--------|
+| `tests/fixtures/entries_import.csv` | Sample accounting entries (sales, purchases, bank) | ✅ |
+| `tests/fixtures/bank_statement.csv` | Sample bank statement with various transaction types | ✅ |
+| `tests/fixtures/chart_of_accounts.csv` | Sample chart of accounts for import | ✅ |
+
 ---
 
 ## 8. Test Environment
@@ -918,27 +969,48 @@ Coverage:
 
 ## 16. Implementation Recommendations
 
-### Phase 1: Foundation
-1. Set up test infrastructure (Docker, PHPUnit)
-2. Implement unit tests for `/lib/` functions
-3. Create test data fixtures
+### Phase 1: Foundation ✅
+1. ✅ Set up test infrastructure (Docker, PHPUnit)
+2. ✅ Implement unit tests for `/lib/` functions
+3. ✅ Create test data fixtures
 
-### Phase 2: Core Tests
-1. Integration tests for entries and validation
-2. Functional tests for authentication
-3. Integration tests for period management
+### Phase 2: Core Tests ✅
+1. ✅ Integration tests for entries and validation
+2. ✅ Functional tests for authentication
+3. ✅ Integration tests for period management
 
-### Phase 3: Module Tests
-1. Bank module tests
-2. Lettering module tests
-3. Reports module tests
+### Phase 3: Module Tests ✅
+1. ✅ Bank module tests
+2. ✅ Lettering module tests
+3. ⏳ Reports module tests
 
-### Phase 4: E2E and Acceptance
-1. Complete workflow E2E tests
-2. Acceptance criteria validation
-3. Security test suite
+### Phase 4: E2E and Acceptance ⏳
+1. ⏳ Complete workflow E2E tests
+2. ⏳ Acceptance criteria validation
+3. ⏳ Security test suite
 
-### Phase 5: Optimization
-1. Performance tests
-2. CI/CD pipeline
-3. Coverage reporting
+### Phase 5: Optimization ⏳
+1. ⏳ Performance tests
+2. ⏳ CI/CD pipeline
+3. ⏳ Coverage reporting
+
+---
+
+## 17. Files Created
+
+| File | Description |
+|------|-------------|
+| `tests/phpunit.xml` | PHPUnit configuration |
+| `tests/bootstrap.php` | Test setup and helpers |
+| `tests/unit/UtilsTest.php` | 40+ unit tests for utils.php |
+| `tests/unit/AuthTest.php` | 25+ unit tests for auth.php |
+| `tests/integration/EntriesTest.php` | Entry CRUD and posting tests |
+| `tests/integration/AccountsTest.php` | Account CRUD tests |
+| `tests/integration/BankTest.php` | Bank import and reconciliation tests |
+| `tests/integration/LetteringTest.php` | Lettering operation tests |
+| `tests/integration/ClosureTest.php` | Period lock and year-end tests |
+| `tests/functional/LoginTest.php` | HTTP authentication tests |
+| `tests/fixtures/entries_import.csv` | Sample entries for import |
+| `tests/fixtures/bank_statement.csv` | Sample bank statement |
+| `tests/fixtures/chart_of_accounts.csv` | Sample chart of accounts |
+| `docker-compose.test.yml` | Test environment configuration |
