@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS company (
     fiscal_year_start TEXT NOT NULL,
     fiscal_year_end TEXT NOT NULL,
     fiscal_year_closed INTEGER NOT NULL DEFAULT 0,
-    carry_forward_account TEXT DEFAULT '110000'
+    carry_forward_account TEXT DEFAULT '110000',
+    lettering_tolerance REAL NOT NULL DEFAULT 0.05
 );
 
 -- Fiscal periods
@@ -160,11 +161,14 @@ CREATE TABLE IF NOT EXISTS lettering_groups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     account_id INTEGER NOT NULL,
     third_party_id INTEGER NULL,
+    letter_code TEXT NOT NULL,
+    is_partial INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,
     created_by INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_lettering_groups_account ON lettering_groups (account_id);
 CREATE INDEX IF NOT EXISTS idx_lettering_groups_third_party ON lettering_groups (third_party_id);
+CREATE INDEX IF NOT EXISTS idx_lettering_groups_code ON lettering_groups (account_id, letter_code);
 
 -- Lettering items
 CREATE TABLE IF NOT EXISTS lettering_items (

@@ -10,6 +10,9 @@ require_once __DIR__ . '/lib/utils.php';
 
 auth_start_session();
 
+// Output buffering for consistent encoding - do not remove
+ob_start('_compta_transform_output');
+
 // Get page title
 $page_title = isset($page_title) ? $page_title : 'Ketchup Compta';
 $company = get_company();

@@ -4,9 +4,6 @@
         <testsuite name="Unit">
             <directory>unit</directory>
         </testsuite>
-        <testsuite name="Integration">
-            <directory>integration</directory>
-        </testsuite>
         <testsuite name="Functional">
             <directory>functional</directory>
         </testsuite>

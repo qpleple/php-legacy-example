@@ -1,9 +1,4 @@
 date;journal_code;label;account_code;third_party_name;debit;credit;vat_rate_label;due_date;piece_ref
-15/01/2024;VE;Facture Client ABC;411000;;1200,00;0,00;;15/02/2024;FAC001
-15/01/2024;VE;Facture Client ABC;707000;;0,00;1000,00;;;FAC001
-15/01/2024;VE;Facture Client ABC;44571;;0,00;200,00;TVA20;;FAC001
-20/01/2024;AC;Achat fournitures;606000;;500,00;0,00;;;ACH001
-20/01/2024;AC;Achat fournitures;44566;;100,00;0,00;TVA20;;ACH001
-20/01/2024;AC;Achat fournitures;401000;;0,00;600,00;;20/02/2024;ACH001
-25/01/2024;BK;Reglement client ABC;512000;;1200,00;0,00;;;BK001
-25/01/2024;BK;Reglement client ABC;411000;;0,00;1200,00;;;BK001
+15/01/2026;VE;Facture Client Import;411000;;1200,00;0,00;;15/02/2026;FACIMP01
+15/01/2026;VE;Facture Client Import;707000;;0,00;1000,00;;;FACIMP01
+15/01/2026;VE;Facture Client Import;44571;;0,00;200,00;;;FACIMP01

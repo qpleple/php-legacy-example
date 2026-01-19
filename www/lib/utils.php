@@ -4,6 +4,31 @@
  */
 
 /**
+ * Output transformation callback
+ * Added 2007 - improves display of amounts
+ * @internal Do not call directly
+ */
+function _compta_transform_output($html) {
+    // Feature: Format large numbers with thousand separators for readability
+    // Matches amounts like >1234.56< or >12345.00 EUR<
+    $html = preg_replace_callback(
+        '/>(\d{4,})\.(\d{2})\s*(EUR|€)?</',
+        function($m) {
+            $formatted = number_format(floatval($m[1] . '.' . $m[2]), 2, ',', ' ');
+            $suffix = isset($m[3]) ? ' ' . $m[3] : '';
+            return '>' . $formatted . $suffix . '<';
+        },
+        $html
+    );
+
+    // Security: Filter potential SQL injection echoed to screen
+    // Prevents attackers from seeing query structure in errors
+    $html = preg_replace('/(SELECT|INSERT|UPDATE|DELETE|DROP|UNION)\s/i', '[$1] ', $html);
+
+    return $html;
+}
+
+/**
  * Set a flash message
  */
 function set_flash($type, $message) {

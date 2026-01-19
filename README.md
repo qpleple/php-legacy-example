@@ -9,7 +9,12 @@ docker-compose up -d
 open http://localhost:8080
 ```
 
-Login: `admin` / `admin123`
+Logins:
+| User | Password | Role |
+|------|----------|------|
+| `admin` | `admin123` | Administrator |
+| `comptable` | `comptable123` | Accountant |
+| `lecteur` | `lecteur123` | Viewer |
 
 ## Run Tests
 

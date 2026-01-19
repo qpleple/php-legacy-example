@@ -1,0 +1,22 @@
+# Apache configuration for Ketchup Compta
+# Legacy setup - do not modify without testing
+
+# PHP settings
+php_value auto_prepend_file "/var/www/html/lib/bootstrap.php"
+php_value upload_max_filesize 5M
+php_value post_max_size 6M
+
+# Directory security
+Options -Indexes
+
+# Deny access to sensitive files
+<FilesMatch "\.(log|sql|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect data directory
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^data/ - [F,L]
+</IfModule>

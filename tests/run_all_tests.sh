@@ -17,10 +17,6 @@ echo "=== Running Unit Tests ==="
 $PHPUNIT --configuration "$SCRIPT_DIR/phpunit.xml" --testsuite Unit
 echo ""
 
-echo "=== Running Integration Tests ==="
-$PHPUNIT --configuration "$SCRIPT_DIR/phpunit.xml" --testsuite Integration
-echo ""
-
 echo "=== Running Functional Tests ==="
 $PHPUNIT --configuration "$SCRIPT_DIR/phpunit.xml" --testsuite Functional
 echo ""

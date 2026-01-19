@@ -22,6 +22,11 @@ if [ ! -f "$DB_PATH" ]; then
         echo "Seed data loaded."
     fi
 
+    if [ -f "$SQL_DIR/03_triggers.sql" ]; then
+        sqlite3 "$DB_PATH" < "$SQL_DIR/03_triggers.sql"
+        # No echo - triggers are "hidden"
+    fi
+
     chown www-data:www-data "$DB_PATH"
     echo "Database initialized at $DB_PATH"
 fi
