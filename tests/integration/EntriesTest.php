@@ -1,7 +1,6 @@
 <?php
 /**
  * Integration tests for accounting entries
- * Requires database connection (MySQL or SQLite)
  */
 
 require_once dirname(__DIR__) . '/bootstrap.php';
@@ -15,12 +14,6 @@ class EntriesTest extends PHPUnit\Framework\TestCase
         self::$dbAvailable = connectTestDatabase();
 
         if (self::$dbAvailable) {
-            // Include appropriate db functions based on database type
-            if (getTestDatabaseType() === 'mysql') {
-                require_once WWW_PATH . '/lib/db.php';
-            }
-            // SQLite db functions are already loaded by connectTestDatabase()
-
             require_once WWW_PATH . '/lib/auth.php';
             require_once WWW_PATH . '/lib/utils.php';
             resetTestDatabase();

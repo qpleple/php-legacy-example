@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="bootstrap.php" colors="true" stopOnFailure="false">
     <testsuites>
-        <!-- Integration tests must run first to define real db functions -->
-        <testsuite name="Integration">
-            <directory>integration</directory>
-        </testsuite>
         <testsuite name="Unit">
             <directory>unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>integration</directory>
         </testsuite>
         <testsuite name="Functional">
             <directory>functional</directory>
@@ -18,10 +17,4 @@
             <directory>acceptance</directory>
         </testsuite>
     </testsuites>
-    <php>
-        <env name="DB_HOST" value="localhost"/>
-        <env name="DB_USER" value="compta"/>
-        <env name="DB_PASS" value="compta123"/>
-        <env name="DB_NAME" value="compta_test"/>
-    </php>
 </phpunit>

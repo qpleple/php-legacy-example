@@ -15,9 +15,6 @@ class AccountsTest extends PHPUnit\Framework\TestCase
         self::$dbAvailable = connectTestDatabase();
 
         if (self::$dbAvailable) {
-            if (getTestDatabaseType() === 'mysql') {
-                require_once WWW_PATH . '/lib/db.php';
-            }
             require_once WWW_PATH . '/lib/auth.php';
             require_once WWW_PATH . '/lib/utils.php';
             resetTestDatabase();

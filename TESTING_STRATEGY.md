@@ -27,7 +27,7 @@ This document outlines a comprehensive testing strategy for the legacy PHP accou
 | Layer | Purpose | Tools | Coverage Target | Status |
 |-------|---------|-------|-----------------|--------|
 | **Unit Tests** | Test individual functions in `/lib/` | PHPUnit | 80% of utility functions | ✅ |
-| **Integration Tests** | Test database operations and module logic | PHPUnit + MySQL | All CRUD operations | ✅ |
+| **Integration Tests** | Test database operations and module logic | PHPUnit + SQLite | All CRUD operations | ✅ |
 | **Functional Tests** | Test HTTP endpoints and form submissions | PHPUnit + curl/Guzzle | All pages/routes | ✅ |
 | **End-to-End Tests** | Test complete user workflows | Selenium/Playwright | Critical business flows | ⏳ |
 | **Acceptance Tests** | Validate against spec criteria (Section 13) | Manual + Automated | 100% of acceptance criteria | ⏳ |
@@ -638,38 +638,20 @@ The following CSV fixtures have been created for import testing:
 
 ## 8. Test Environment
 
-### 8.1 Docker Test Environment
+### 8.1 SQLite In-Memory Database
 
-```yaml
-# docker-compose.test.yml
-version: '3'
-services:
-  web-test:
-    build: .
-    ports:
-      - "8081:80"
-    volumes:
-      - ./www:/var/www/html
-      - ./tests:/var/www/tests
-    environment:
-      - DB_HOST=db-test
-      - DB_NAME=accounting_test
-      - PHP_ENV=test
-    depends_on:
-      - db-test
+Tests use SQLite in-memory database for speed and simplicity - no external database required.
 
-  db-test:
-    image: mysql:5.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=test
-      - MYSQL_DATABASE=accounting_test
-    tmpfs:
-      - /var/lib/mysql  # Use tmpfs for faster tests
-
-  selenium:
-    image: selenium/standalone-chrome
-    ports:
-      - "4444:4444"
+```php
+// tests/bootstrap.php
+function connectTestDatabase() {
+    global $db_pdo;
+    $db_pdo = new PDO('sqlite::memory:');
+    // Load schema and seed data
+    resetTestDatabase();
+    require_once TESTS_PATH . '/db_sqlite.php';
+    return true;
+}
 ```
 
 ### 8.2 Test Database Reset
@@ -677,17 +659,12 @@ services:
 ```php
 // tests/bootstrap.php
 function resetTestDatabase() {
-    $sql = file_get_contents('/sql/01_schema.sql');
-    db_query($sql);
-    $sql = file_get_contents('/sql/02_seed.sql');
-    db_query($sql);
-}
-
-// Run before each test class
-class TestCase extends PHPUnit\Framework\TestCase {
-    public static function setUpBeforeClass(): void {
-        resetTestDatabase();
-    }
+    global $db_pdo;
+    // Execute sqlite_schema.sql and sqlite_seed.sql
+    $schema = file_get_contents(TESTS_PATH . '/sqlite_schema.sql');
+    $db_pdo->exec($schema);
+    $seed = file_get_contents(TESTS_PATH . '/sqlite_seed.sql');
+    $db_pdo->exec($seed);
 }
 ```
 
@@ -773,7 +750,7 @@ Test Cases:
 - Login with SQL injection in password: ' OR '1'='1
 - Account search with injection: %' OR '1'='1'--%
 - Entry label with injection attempt
-- Verify mysql_real_escape_string escapes all inputs
+- Verify db_escape() escapes all inputs
 ```
 
 ### 10.2 XSS Tests
@@ -1001,7 +978,7 @@ Coverage:
 | File | Description |
 |------|-------------|
 | `tests/phpunit.xml` | PHPUnit configuration |
-| `tests/bootstrap.php` | Test setup with MySQL/SQLite fallback |
+| `tests/bootstrap.php` | Test setup with SQLite in-memory database |
 | `tests/unit_bootstrap.php` | Unit test bootstrap with mock DB functions |
 | `tests/db_sqlite.php` | SQLite database wrapper for testing |
 | `tests/sqlite_schema.sql` | SQLite-compatible schema |
@@ -1046,14 +1023,10 @@ Due to function definition conflicts between unit test mocks and integration tes
 
 ### 18.3 Test Database
 
-Integration tests support two database backends:
-
-1. **MySQL** (preferred) - Tests will use MySQL if available via environment variables:
-   - `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`
-
-2. **SQLite** (fallback) - If MySQL is not available, tests automatically fall back to an in-memory SQLite database with:
-   - `tests/sqlite_schema.sql` - Schema translated from MySQL
-   - `tests/sqlite_seed.sql` - Seed data translated from MySQL
+Integration tests use SQLite in-memory database:
+- `tests/sqlite_schema.sql` - Database schema
+- `tests/sqlite_seed.sql` - Seed data
+- No external database required - tests run anywhere
 
 ### 18.4 Current Test Results
 
