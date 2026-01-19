@@ -1,0 +1,17 @@
+code;label;type;active
+101000;Capital social;general;1
+110000;Report a nouveau;general;1
+120000;Resultat de l'exercice;general;1
+401000;Fournisseurs;vendor;1
+401001;Fournisseur ABC;vendor;1
+401002;Fournisseur XYZ;vendor;1
+411000;Clients;customer;1
+411001;Client ABC;customer;1
+411002;Client DEF;customer;1
+44566;TVA deductible;general;1
+44571;TVA collectee;general;1
+512000;Banque principale;general;1
+606000;Achats non stockes;general;1
+607000;Achats de marchandises;general;1
+707000;Ventes de marchandises;general;1
+708000;Produits des activites annexes;general;1

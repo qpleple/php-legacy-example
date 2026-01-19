@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  web-test:
+    build: .
+    ports:
+      - "8081:80"
+    volumes:
+      - ./www:/var/www/html
+      - ./tests:/var/www/tests
+    environment:
+      - DB_HOST=db-test
+      - DB_USER=compta
+      - DB_PASS=compta123
+      - DB_NAME=compta_test
+      - PHP_ENV=test
+    depends_on:
+      db-test:
+        condition: service_healthy
+
+  db-test:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=compta_test
+      - MYSQL_USER=compta
+      - MYSQL_PASSWORD=compta123
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d:ro
+
+  phpunit:
+    build: .
+    volumes:
+      - ./www:/var/www/html
+      - ./tests:/var/www/tests
+      - ./sql:/var/www/sql
+    environment:
+      - DB_HOST=db-test
+      - DB_USER=compta
+      - DB_PASS=compta123
+      - DB_NAME=compta_test
+      - APP_URL=http://web-test
+    working_dir: /var/www/tests
+    depends_on:
+      - db-test
+      - web-test
+    command: >
+      sh -c "
+        composer require --dev phpunit/phpunit:^9 2>/dev/null || true &&
+        ./vendor/bin/phpunit --configuration phpunit.xml
+      "

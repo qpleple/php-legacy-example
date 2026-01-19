@@ -1,0 +1,6 @@
+{
+    "name": "test/accounting-tests",
+    "require-dev": {
+        "phpunit/phpunit": "^10"
+    }
+}
