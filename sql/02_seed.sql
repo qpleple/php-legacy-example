@@ -2,12 +2,12 @@
 
 SET NAMES utf8;
 
--- Admin user (password: admin123, MD5 with salt 'legacy')
--- MD5('legacy' . 'admin123') = md5('legacyadmin123')
+-- Users (passwords hashed with MD5 and salt 'legacy')
+-- admin/admin123, comptable/comptable123, lecteur/lecteur123
 INSERT INTO users (username, password_hash, role, created_at) VALUES
-('admin', '5d93ceb70e2bf5daa84ec3d0cd2c731a', 'admin', NOW()),
-('comptable', 'e5e0f7cd43c1c3e3f3f4a4c5d6e7f8a9', 'accountant', NOW()),
-('lecteur', 'a1b2c3d4e5f6789012345678901234ab', 'viewer', NOW());
+('admin', 'dc3d211a05fd3ee30f403df94956af0c', 'admin', NOW()),
+('comptable', 'b674405f0a72362160eb19ec872a9c32', 'accountant', NOW()),
+('lecteur', '95ed37882a8c94f288ff88d39dc5c4c8', 'viewer', NOW());
 
 -- Company settings
 INSERT INTO company (id, name, currency, fiscal_year_start, fiscal_year_end, carry_forward_account) VALUES
