@@ -54,13 +54,19 @@ function connectTestDatabase() {
     $DB_PASS = getenv('DB_PASS') ?: 'compta123';
     $DB_NAME = getenv('DB_NAME') ?: 'compta_test';
 
-    $db_link = @mysqli_connect($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
+    try {
+        $db_link = @mysqli_connect($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 
-    if ($db_link) {
-        mysqli_query($db_link, "SET NAMES utf8");
+        if ($db_link) {
+            mysqli_query($db_link, "SET NAMES utf8");
+            return true;
+        }
+    } catch (mysqli_sql_exception $e) {
+        // Database not available
+        $db_link = null;
     }
 
-    return $db_link !== false;
+    return false;
 }
 
 /**

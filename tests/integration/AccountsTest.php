@@ -5,9 +5,6 @@
  */
 
 require_once dirname(__DIR__) . '/bootstrap.php';
-require_once WWW_PATH . '/lib/db.php';
-require_once WWW_PATH . '/lib/auth.php';
-require_once WWW_PATH . '/lib/utils.php';
 
 class AccountsTest extends PHPUnit\Framework\TestCase
 {
@@ -15,8 +12,14 @@ class AccountsTest extends PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass(): void
     {
+        // Try to connect to database first
         self::$dbAvailable = connectTestDatabase();
+
         if (self::$dbAvailable) {
+            // Only include db-dependent files if connection succeeded
+            require_once WWW_PATH . '/lib/db.php';
+            require_once WWW_PATH . '/lib/auth.php';
+            require_once WWW_PATH . '/lib/utils.php';
             resetTestDatabase();
         }
     }
