@@ -3,9 +3,14 @@
  * Dashboard / Index page - Legacy style
  */
 
+require_once __DIR__ . '/lib/db.php';
+require_once __DIR__ . '/lib/auth.php';
+require_once __DIR__ . '/lib/utils.php';
+
+require_login();
+
 $page_title = 'Tableau de bord';
 require_once __DIR__ . '/header.php';
-require_login();
 
 // Get company info
 $company = get_company();

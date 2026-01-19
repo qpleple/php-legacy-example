@@ -4,7 +4,7 @@ This file provides context for Claude (AI assistant) when working with this code
 
 ## Project Overview
 
-This is a **PHP legacy accounting application** intentionally built with 2006-era patterns. It implements French double-entry bookkeeping (comptabilité en partie double) with features like journal management, VAT handling, bank reconciliation, and financial reports.
+**Ketchup Compta** is a PHP legacy accounting application intentionally built with 2006-era patterns. It implements French double-entry bookkeeping (comptabilité en partie double) with features like journal management, VAT handling, bank reconciliation, and financial reports.
 
 ## Quick Reference
 
@@ -31,7 +31,8 @@ docker-compose down -v && docker-compose up -d
 
 ### Database Access
 ```bash
-docker-compose exec db mysql -u compta -pcompta123 compta
+# Access SQLite database
+docker-compose exec web sqlite3 /var/www/html/data/compta.db
 ```
 
 ## Architecture Patterns (Legacy by Design)
@@ -39,11 +40,11 @@ docker-compose exec db mysql -u compta -pcompta123 compta
 This codebase deliberately uses outdated patterns. When making changes, **maintain consistency** with existing patterns:
 
 ### PHP Patterns
-- **Procedural PHP** - No classes (except FPDF library)
+- **Procedural PHP** - No classes (except FPDF library and SQLiteResult)
 - **No framework** - Pure PHP with includes
 - **Inline SQL** - Queries written directly in page files
-- **Global DB connection** - `$db_link` variable from `lib/db.php`
-- **mysqli_* functions** - Not PDO, not prepared statements
+- **Global DB connection** - `$db_pdo` variable from `lib/db.php`
+- **PDO with SQLite** - Simple file-based database
 
 ### Page Structure Pattern
 Every page follows this structure:
@@ -105,12 +106,12 @@ db_query("INSERT INTO accounts (code, label) VALUES ('" . db_escape($code) . "',
 
 | File | Purpose | Lines |
 |------|---------|-------|
-| `www/lib/db.php` | Database connection and query functions | ~130 |
+| `www/lib/db.php` | Database connection and query functions (SQLite) | ~180 |
 | `www/lib/auth.php` | Authentication, authorization, CSRF, audit | ~220 |
 | `www/lib/utils.php` | Helpers (flash, formatting, escaping) | ~100 |
 | `www/modules/entries/edit.php` | Most complex file - entry creation | ~850 |
 | `www/header.php` | Navigation menu and layout start | ~105 |
-| `sql/01_schema.sql` | All table definitions | ~200 |
+| `sql/01_schema.sql` | All table definitions (SQLite) | ~190 |
 
 ## Database Schema Quick Reference
 
@@ -209,6 +210,7 @@ $pdf->Output('I', 'filename.pdf');
 | Generated PDFs | `www/pdf/` |
 | Database schema | `sql/01_schema.sql` |
 | Seed data | `sql/02_seed.sql` |
+| SQLite database | `www/data/compta.db` (in container) |
 
 ## Code Conventions
 

@@ -39,7 +39,7 @@ $page_title = 'Connexion';
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Connexion - Comptabilite</title>
+    <title>Connexion - Ketchup Compta</title>
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>

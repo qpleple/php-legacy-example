@@ -1,12 +1,17 @@
 #!/bin/bash
-# Run all test suites
-# Unit and Integration tests are run in separate PHP processes to avoid function conflicts
+# Run all test suites in separate PHP processes to avoid function conflicts
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-PHPUNIT="$PROJECT_DIR/vendor/bin/phpunit"
+PHPUNIT="$SCRIPT_DIR/vendor/bin/phpunit"
+
+# Install dependencies if needed
+if [ ! -f "$PHPUNIT" ]; then
+    echo "Installing test dependencies..."
+    composer install --working-dir="$SCRIPT_DIR"
+    echo ""
+fi
 
 echo "=== Running Unit Tests ==="
 $PHPUNIT --configuration "$SCRIPT_DIR/phpunit.xml" --testsuite Unit

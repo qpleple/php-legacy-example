@@ -1,6 +1,7 @@
 {
-    "name": "test/accounting-tests",
+    "name": "example/ketchup-compta-tests",
+    "description": "Tests for Ketchup Compta",
     "require-dev": {
-        "phpunit/phpunit": "^10"
+        "phpunit/phpunit": "^9.6"
     }
 }

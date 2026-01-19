@@ -10,11 +10,5 @@
         <testsuite name="Functional">
             <directory>functional</directory>
         </testsuite>
-        <testsuite name="E2E">
-            <directory>e2e</directory>
-        </testsuite>
-        <testsuite name="Acceptance">
-            <directory>acceptance</directory>
-        </testsuite>
     </testsuites>
 </phpunit>

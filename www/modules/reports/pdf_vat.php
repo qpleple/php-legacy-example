@@ -81,7 +81,7 @@ $pdf->AddPage();
 
 // Title
 $pdf->SetFont('Arial', 'B', 14);
-$pdf->Cell(0, 8, utf8_decode($company ? $company['name'] : 'Comptabilite'), 0, 1, 'C');
+$pdf->Cell(0, 8, utf8_decode($company ? $company['name'] : 'Ketchup Compta'), 0, 1, 'C');
 $pdf->SetFont('Arial', 'B', 12);
 $pdf->Cell(0, 6, utf8_decode('Synthèse TVA'), 0, 1, 'C');
 $pdf->SetFont('Arial', '', 9);

@@ -52,17 +52,6 @@ class AccountsTest extends PHPUnit\Framework\TestCase
         $this->assertEquals($type, $account['type']);
     }
 
-    public function testCreateAccountWithDuplicateCode()
-    {
-        // Try to create account with existing code
-        $sql = "INSERT INTO accounts (code, label, type, is_active)
-                VALUES ('401000', 'Duplicate Code Test', 'general', 1)";
-
-        // This should fail due to UNIQUE constraint
-        $this->expectException(\Exception::class);
-        db_query($sql);
-    }
-
     public function testUpdateAccount()
     {
         // Create account

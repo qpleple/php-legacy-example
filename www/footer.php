@@ -1,7 +1,7 @@
         </div><!-- #content -->
 
         <div id="footer">
-            <p>Application de comptabilite &copy; <?php echo date('Y'); ?> - Style 2006</p>
+            <p>Ketchup Compta &copy; <?php echo date('Y'); ?> - Style 2006</p>
         </div>
     </div><!-- #wrapper -->
 

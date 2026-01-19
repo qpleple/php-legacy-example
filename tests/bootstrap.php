@@ -64,8 +64,8 @@ function connectTestDatabase() {
         // Initialize schema and seed data
         resetTestDatabase();
 
-        // Include SQLite db wrapper
-        require_once TESTS_PATH . '/db_sqlite.php';
+        // Include main db wrapper (now SQLite-based)
+        require_once WWW_PATH . '/lib/db.php';
 
         return true;
     } catch (PDOException $e) {

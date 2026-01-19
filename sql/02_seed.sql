@@ -1,17 +1,16 @@
 -- Seed data for PHP Legacy Accounting Application
-
-SET NAMES utf8;
+-- SQLite version
 
 -- Users (passwords hashed with MD5 and salt 'legacy')
 -- admin/admin123, comptable/comptable123, lecteur/lecteur123
 INSERT INTO users (username, password_hash, role, created_at) VALUES
-('admin', 'dc3d211a05fd3ee30f403df94956af0c', 'admin', NOW()),
-('comptable', 'b674405f0a72362160eb19ec872a9c32', 'accountant', NOW()),
-('lecteur', '95ed37882a8c94f288ff88d39dc5c4c8', 'viewer', NOW());
+('admin', 'dc3d211a05fd3ee30f403df94956af0c', 'admin', datetime('now')),
+('comptable', 'b674405f0a72362160eb19ec872a9c32', 'accountant', datetime('now')),
+('lecteur', '95ed37882a8c94f288ff88d39dc5c4c8', 'viewer', datetime('now'));
 
 -- Company settings
 INSERT INTO company (id, name, currency, fiscal_year_start, fiscal_year_end, carry_forward_account) VALUES
-(1, 'Ma Societe SARL', 'EUR', '2024-01-01', '2024-12-31', '110000');
+(1, 'Ketchup Compta', 'EUR', '2024-01-01', '2024-12-31', '110000');
 
 -- Default journals
 INSERT INTO journals (code, label, sequence_prefix, next_number) VALUES
@@ -70,11 +69,14 @@ INSERT INTO accounts (code, label, type, is_active) VALUES
 ('708000', 'Produits des activites annexes', 'general', 1);
 
 -- Third parties
-INSERT INTO third_parties (type, name, account_id, email, created_at) VALUES
-('customer', 'Client Dupont', (SELECT id FROM accounts WHERE code = '411001'), 'dupont@example.com', NOW()),
-('customer', 'Client Martin', (SELECT id FROM accounts WHERE code = '411002'), 'martin@example.com', NOW()),
-('vendor', 'Fournisseur ABC', (SELECT id FROM accounts WHERE code = '401001'), 'abc@example.com', NOW()),
-('vendor', 'Fournisseur XYZ', (SELECT id FROM accounts WHERE code = '401002'), 'xyz@example.com', NOW());
+INSERT INTO third_parties (type, name, account_id, email, created_at)
+SELECT 'customer', 'Client Dupont', id, 'dupont@example.com', datetime('now') FROM accounts WHERE code = '411001';
+INSERT INTO third_parties (type, name, account_id, email, created_at)
+SELECT 'customer', 'Client Martin', id, 'martin@example.com', datetime('now') FROM accounts WHERE code = '411002';
+INSERT INTO third_parties (type, name, account_id, email, created_at)
+SELECT 'vendor', 'Fournisseur ABC', id, 'abc@example.com', datetime('now') FROM accounts WHERE code = '401001';
+INSERT INTO third_parties (type, name, account_id, email, created_at)
+SELECT 'vendor', 'Fournisseur XYZ', id, 'xyz@example.com', datetime('now') FROM accounts WHERE code = '401002';
 
 -- Periods for 2024 fiscal year (monthly)
 INSERT INTO periods (start_date, end_date, status) VALUES
@@ -92,5 +94,5 @@ INSERT INTO periods (start_date, end_date, status) VALUES
 ('2024-12-01', '2024-12-31', 'open');
 
 -- Bank account
-INSERT INTO bank_accounts (label, account_id, is_active) VALUES
-('Compte BNP Principal', (SELECT id FROM accounts WHERE code = '512001'), 1);
+INSERT INTO bank_accounts (label, account_id, is_active)
+SELECT 'Compte BNP Principal', id, 1 FROM accounts WHERE code = '512001';

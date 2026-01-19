@@ -11,9 +11,9 @@ require_once __DIR__ . '/lib/utils.php';
 auth_start_session();
 
 // Get page title
-$page_title = isset($page_title) ? $page_title : 'Comptabilite';
+$page_title = isset($page_title) ? $page_title : 'Ketchup Compta';
 $company = get_company();
-$company_name = $company ? $company['name'] : 'Comptabilite';
+$company_name = $company ? $company['name'] : 'Ketchup Compta';
 ?>
 <!DOCTYPE html>
 <html lang="fr">

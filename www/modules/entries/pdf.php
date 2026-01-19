@@ -47,7 +47,7 @@ $pdf->SetMargins(15, 15, 15);
 
 // Header
 $pdf->SetFont('Arial', 'B', 14);
-$pdf->Cell(0, 10, utf8_decode($company ? $company['name'] : 'Comptabilite'), 0, 1, 'C');
+$pdf->Cell(0, 10, utf8_decode($company ? $company['name'] : 'Ketchup Compta'), 0, 1, 'C');
 
 $pdf->SetFont('Arial', '', 10);
 $pdf->Cell(0, 6, 'Piece Comptable', 0, 1, 'C');
