@@ -337,6 +337,282 @@ SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '
        'LogiTrans - Livr. express', 0, 180.00;
 
 -- ============================================================================
+-- SCENARIO 9: DURAND DISTRIBUTION - SHOWCASE ACCOUNT
+-- A realistic customer with complex history demonstrating automatic lettering
+-- ============================================================================
+
+-- Create the showcase customer account
+INSERT INTO accounts (code, label, type, is_active) VALUES
+('411010', 'Client Durand Distribution', 'customer', 1);
+
+INSERT INTO third_parties (type, name, account_id, email, created_at)
+SELECT 'customer', 'Durand Distribution', id, 'compta@durand-distrib.fr', datetime('now')
+FROM accounts WHERE code = '411010';
+
+-- ---------------------------------------------------------------------------
+-- PART A: ALREADY LETTERED (History - shows the system works)
+-- Invoice 5000 + Payment 5000 = perfectly lettered (AA)
+-- ---------------------------------------------------------------------------
+
+-- Old invoice FA-2025-100 (December 2025, carried forward)
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-01', 1, 'VE2026-000100', 'Report a nouveau - Facture Durand Dec 2025', 'posted', 5000.00, 5000.00, 2, '2026-01-01 08:00:00', '2026-01-01 08:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-2025-100 Report', 5000.00, 0, '2026-01-15';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '706000'), 'Report ventes Dec 2025', 0, 4166.67;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 833.33;
+
+-- Payment for the old invoice
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (3, '2026-01-05', 1, 'BK2026-000100', 'Reglement Durand FA-2025-100', 'posted', 5000.00, 5000.00, 2, '2026-01-05 09:00:00', '2026-01-05 09:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '512001'), 'Virement Durand ref 2025-100', 5000.00, 0;
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Reglement FA-2025-100', 0, 5000.00;
+
+-- Create lettering group for the above (already matched)
+INSERT INTO lettering_groups (account_id, third_party_id, letter_code, is_partial, created_at, created_by)
+SELECT
+    (SELECT id FROM accounts WHERE code = '411010'),
+    (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+    'AA', 0, datetime('now'), 2;
+
+INSERT INTO lettering_items (group_id, entry_line_id, amount)
+SELECT
+    (SELECT MAX(id) FROM lettering_groups),
+    el.id,
+    CASE WHEN el.debit > 0 THEN el.debit ELSE -el.credit END
+FROM entry_lines el
+JOIN entries e ON el.entry_id = e.id
+WHERE el.account_id = (SELECT id FROM accounts WHERE code = '411010')
+  AND e.piece_number IN ('VE2026-000100', 'BK2026-000100');
+
+-- ---------------------------------------------------------------------------
+-- PART B: EASY 1-TO-1 MATCH (Auto-suggestion should find this immediately)
+-- Invoice 2400 EUR + Payment 2400 EUR
+-- ---------------------------------------------------------------------------
+
+-- Invoice FA-2026-101
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-08', 1, 'VE2026-000101', 'Facture FA-2026-101 Durand Distribution', 'posted', 2400.00, 2400.00, 2, '2026-01-08 10:00:00', '2026-01-08 10:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-2026-101 Commande 5001', 2400.00, 0, '2026-02-08';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Marchandises lot A', 0, 2000.00;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 400.00;
+
+-- Exact payment
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (3, '2026-01-20', 1, 'BK2026-000101', 'Virement Durand ref 101', 'posted', 2400.00, 2400.00, 2, '2026-01-20 14:00:00', '2026-01-20 14:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '512001'), 'Durand Distrib - ref FA101', 2400.00, 0;
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Reglement FA-2026-101', 0, 2400.00;
+
+-- ---------------------------------------------------------------------------
+-- PART C: INVOICE + CREDIT NOTE MATCH
+-- Invoice 3600 EUR - Credit note 600 EUR = Net 3000 EUR, Payment 3000 EUR
+-- ---------------------------------------------------------------------------
+
+-- Invoice FA-2026-102
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-10', 1, 'VE2026-000102', 'Facture FA-2026-102 Durand Distribution', 'posted', 3600.00, 3600.00, 2, '2026-01-10 11:00:00', '2026-01-10 11:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-2026-102 Equipement', 3600.00, 0, '2026-02-10';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Equipement professionnel', 0, 3000.00;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 600.00;
+
+-- Credit note AV-2026-001 (avoir)
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-12', 1, 'VE2026-000103', 'Avoir AV-2026-001 Durand - Retour partiel', 'posted', 600.00, 600.00, 2, '2026-01-12 09:00:00', '2026-01-12 09:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - AV-2026-001 Retour defectueux', 0, 600.00;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Retour equipement defectueux', 500.00, 0;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20% avoir', 100.00, 0;
+
+-- Payment for net amount (3600 - 600 = 3000)
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (3, '2026-01-22', 1, 'BK2026-000102', 'Virement Durand net FA102-AV001', 'posted', 3000.00, 3000.00, 2, '2026-01-22 15:00:00', '2026-01-22 15:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '512001'), 'Durand - Solde FA102 moins avoir', 3000.00, 0;
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Reglement FA-102 net avoir AV-001', 0, 3000.00;
+
+-- ---------------------------------------------------------------------------
+-- PART D: MULTIPLE SMALL INVOICES, ONE PAYMENT (N-to-1)
+-- 4 invoices: 450 + 550 + 600 + 400 = 2000 EUR, Payment 2000 EUR
+-- ---------------------------------------------------------------------------
+
+-- Invoice FA-2026-104
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-14', 1, 'VE2026-000104', 'Facture FA-2026-104 Durand', 'posted', 450.00, 450.00, 2, '2026-01-14 08:00:00', '2026-01-14 08:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-104 Fournitures', 450.00, 0, '2026-02-14';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Fournitures diverses', 0, 375.00;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 75.00;
+
+-- Invoice FA-2026-105
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-15', 1, 'VE2026-000105', 'Facture FA-2026-105 Durand', 'posted', 550.00, 550.00, 2, '2026-01-15 09:00:00', '2026-01-15 09:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-105 Consommables', 550.00, 0, '2026-02-15';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Consommables bureau', 0, 458.33;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 91.67;
+
+-- Invoice FA-2026-106
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-16', 1, 'VE2026-000106', 'Facture FA-2026-106 Durand', 'posted', 600.00, 600.00, 2, '2026-01-16 10:00:00', '2026-01-16 10:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-106 Accessoires', 600.00, 0, '2026-02-16';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Accessoires informatiques', 0, 500.00;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 100.00;
+
+-- Invoice FA-2026-107
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-17', 1, 'VE2026-000107', 'Facture FA-2026-107 Durand', 'posted', 400.00, 400.00, 2, '2026-01-17 11:00:00', '2026-01-17 11:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-107 Petit materiel', 400.00, 0, '2026-02-17';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Petit materiel', 0, 333.33;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 66.67;
+
+-- Single payment for all 4 invoices
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (3, '2026-01-25', 1, 'BK2026-000103', 'Virement global Durand FA104-107', 'posted', 2000.00, 2000.00, 2, '2026-01-25 14:00:00', '2026-01-25 14:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '512001'), 'Durand - Reglement groupe janv', 2000.00, 0;
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Reglement FA-104/105/106/107', 0, 2000.00;
+
+-- ---------------------------------------------------------------------------
+-- PART E: PAYMENT WITH TOLERANCE (Bank rounding)
+-- Invoice 1850 EUR, Payment 1849.98 EUR (difference within 0.05 tolerance)
+-- ---------------------------------------------------------------------------
+
+-- Invoice FA-2026-108
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-18', 1, 'VE2026-000108', 'Facture FA-2026-108 Durand', 'posted', 1850.00, 1850.00, 2, '2026-01-18 10:00:00', '2026-01-18 10:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-108 Services', 1850.00, 0, '2026-02-18';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '706000'), 'Prestation conseil', 0, 1541.67;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 308.33;
+
+-- Payment with minor difference (within tolerance)
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (3, '2026-01-28', 1, 'BK2026-000104', 'Virement Durand FA-108', 'posted', 1849.98, 1849.98, 2, '2026-01-28 11:00:00', '2026-01-28 11:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '512001'), 'Durand - FA108 (arrondi banque)', 1849.98, 0;
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Reglement FA-2026-108', 0, 1849.98;
+
+-- ---------------------------------------------------------------------------
+-- PART F: UNPAID INVOICES (Outstanding balance)
+-- 2 invoices waiting - shows real balance situation
+-- ---------------------------------------------------------------------------
+
+-- Invoice FA-2026-109 (unpaid)
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-26', 1, 'VE2026-000109', 'Facture FA-2026-109 Durand', 'posted', 4500.00, 4500.00, 2, '2026-01-26 09:00:00', '2026-01-26 09:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-109 Grosse commande', 4500.00, 0, '2026-02-26';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Commande speciale Q1', 0, 3750.00;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 750.00;
+
+-- Invoice FA-2026-110 (unpaid)
+INSERT INTO entries (journal_id, entry_date, period_id, piece_number, label, status, total_debit, total_credit, created_by, created_at, posted_at)
+VALUES (1, '2026-01-29', 1, 'VE2026-000110', 'Facture FA-2026-110 Durand', 'posted', 2200.00, 2200.00, 2, '2026-01-29 10:00:00', '2026-01-29 10:00:00');
+
+INSERT INTO entry_lines (entry_id, line_no, account_id, third_party_id, label, debit, credit, due_date)
+SELECT last_insert_rowid(), 1, (SELECT id FROM accounts WHERE code = '411010'),
+       (SELECT id FROM third_parties WHERE name = 'Durand Distribution'),
+       'Durand - FA-110 Complement', 2200.00, 0, '2026-02-28';
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 2, (SELECT id FROM accounts WHERE code = '707000'), 'Complement commande Q1', 0, 1833.33;
+INSERT INTO entry_lines (entry_id, line_no, account_id, label, debit, credit)
+SELECT (SELECT MAX(id) FROM entries), 3, (SELECT id FROM accounts WHERE code = '44571'), 'TVA 20%', 0, 366.67;
+
+-- ============================================================================
+-- SUMMARY for DURAND DISTRIBUTION (411010):
+-- ============================================================================
+-- ALREADY LETTERED (AA):
+--   FA-2025-100: +5000 | Payment: -5000 = 0
+--
+-- TO BE LETTERED BY AUTO-SUGGESTION:
+--   B: FA-101 +2400 | Payment -2400 = 0 (easy 1-to-1)
+--   C: FA-102 +3600, AV-001 -600 | Payment -3000 = 0 (invoice + credit note)
+--   D: FA-104 +450, FA-105 +550, FA-106 +600, FA-107 +400 | Payment -2000 = 0 (N-to-1)
+--   E: FA-108 +1850 | Payment -1849.98 = 0.02 (within tolerance)
+--
+-- UNPAID (Outstanding):
+--   FA-109: +4500 (due Feb 26)
+--   FA-110: +2200 (due Feb 28)
+--   Total outstanding: 6700 EUR
+-- ============================================================================
+
+-- ============================================================================
 -- UPDATE COMPANY LETTERING TOLERANCE
 -- ============================================================================
 UPDATE company SET lettering_tolerance = 0.05 WHERE id = 1;

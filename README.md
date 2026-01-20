@@ -2,6 +2,10 @@
 
 French accounting app built with 2006-era PHP patterns (intentionally legacy).
 
+![Screenshot](docs/screenshot.png)
+
+
+
 ## Quick Start
 
 ```bash
