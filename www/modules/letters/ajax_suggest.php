@@ -336,6 +336,7 @@ try {
     if (empty($debit_lines) || empty($credit_lines)) {
         echo json_encode(array(
             'success' => true,
+            'tolerance' => $tolerance,
             'suggestions' => array(),
             'message' => 'Pas assez de lignes pour suggerer un lettrage'
         ));

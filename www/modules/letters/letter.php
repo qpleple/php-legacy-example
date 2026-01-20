@@ -383,13 +383,11 @@ require_once __DIR__ . '/../../header.php';
 
 <h3>Lignes a lettrer (<?php echo count($unlettered_lines); ?>)</h3>
 
-<?php if (count($unlettered_lines) > 0): ?>
-
 <div class="mb-10">
-    <button type="button" id="btn-auto-suggest" class="btn btn-primary" onclick="autoSuggest()">
+    <button type="button" id="btn-auto-suggest" class="btn btn-primary" onclick="autoSuggest()"<?php echo count($unlettered_lines) == 0 ? ' disabled' : ''; ?>>
         Suggestion automatique
     </button>
-    <button type="button" class="btn" onclick="clearSelection()">
+    <button type="button" class="btn" onclick="clearSelection()"<?php echo count($unlettered_lines) == 0 ? ' disabled' : ''; ?>>
         Effacer la selection
     </button>
 </div>
@@ -402,10 +400,10 @@ require_once __DIR__ . '/../../header.php';
         <thead>
             <tr>
                 <th style="width: 30px;">
-                    <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)">
+                    <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"<?php echo count($unlettered_lines) == 0 ? ' disabled' : ''; ?>>
                 </th>
                 <th>Date</th>
-                <th>N&deg; Piece</th>
+                <th>Piece</th>
                 <th>Libelle</th>
                 <th>Tiers</th>
                 <th>Debit</th>
@@ -415,6 +413,7 @@ require_once __DIR__ . '/../../header.php';
             </tr>
         </thead>
         <tbody>
+            <?php if (count($unlettered_lines) > 0): ?>
             <?php foreach ($unlettered_lines as $idx => $line): ?>
             <tr class="lettering-line"
                 id="line-<?php echo $line['id']; ?>"
@@ -454,6 +453,13 @@ require_once __DIR__ . '/../../header.php';
                 </td>
             </tr>
             <?php endforeach; ?>
+            <?php else: ?>
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 20px; color: #666;">
+                    Toutes les lignes sont lettrees pour ce compte.
+                </td>
+            </tr>
+            <?php endif; ?>
         </tbody>
         <tfoot>
             <tr class="report-totals">
@@ -485,10 +491,6 @@ require_once __DIR__ . '/../../header.php';
         </table>
     </div>
 </form>
-
-<?php else: ?>
-<p>Toutes les lignes sont lettrees pour ce compte.</p>
-<?php endif; ?>
 
 <h3 class="mt-20">Lettrages existants (<?php echo count($lettering_groups); ?>)</h3>
 

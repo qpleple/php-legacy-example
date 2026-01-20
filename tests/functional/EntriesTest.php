@@ -27,9 +27,12 @@ class EntriesTest extends FunctionalTestCase
 
     function testEntriesListShowsEntries()
     {
+        // Check VE entries on main list
         $response = $this->get('/modules/entries/list.php');
-
         $this->assertSee('VE2026-000001', $response);
+
+        // Check OD entries by filtering to OD journal (journal_id=4)
+        $response = $this->get('/modules/entries/list.php?journal_id=4');
         $this->assertSee('OD2026-000001', $response);
     }
 

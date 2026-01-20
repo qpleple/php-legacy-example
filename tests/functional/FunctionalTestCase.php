@@ -13,11 +13,47 @@ class FunctionalTestCase extends PHPUnit\Framework\TestCase
     var $cookies;
     var $csrfToken;
 
+    /** @var bool Track if test database has been reset this run */
+    private static $dbReset = false;
+
     protected function setUp(): void
     {
         $this->baseUrl = getenv('APP_URL') ? getenv('APP_URL') : 'http://localhost:8080';
         $this->cookies = array();
         $this->csrfToken = null;
+    }
+
+    /**
+     * Reset test database before first test runs
+     */
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        if (!self::$dbReset) {
+            self::resetTestDatabase();
+            self::$dbReset = true;
+        }
+    }
+
+    /**
+     * Reset the test database via HTTP endpoint
+     */
+    protected static function resetTestDatabase()
+    {
+        $baseUrl = getenv('APP_URL') ? getenv('APP_URL') : 'http://localhost:8080';
+
+        $ch = curl_init($baseUrl . '/test_reset.php');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Test-Mode: 1'));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($httpCode !== 200) {
+            throw new \RuntimeException('Failed to reset test database: ' . $response);
+        }
     }
 
     /**
@@ -31,6 +67,7 @@ class FunctionalTestCase extends PHPUnit\Framework\TestCase
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 5);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Test-Mode: 1'));
             curl_exec($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $running = ($code === 200);
@@ -51,6 +88,9 @@ class FunctionalTestCase extends PHPUnit\Framework\TestCase
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        // Always send X-Test-Mode header to use test database
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Test-Mode: 1'));
 
         if ($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
@@ -264,6 +304,9 @@ class FunctionalTestCase extends PHPUnit\Framework\TestCase
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_POST, true);
+
+        // Always send X-Test-Mode header to use test database
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Test-Mode: 1'));
 
         // Add file to data
         $data[$fileField] = new CURLFile($filePath, 'text/csv', basename($filePath));

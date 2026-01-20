@@ -51,6 +51,36 @@ class SQLiteResult {
 }
 
 /**
+ * Check if running in test mode (via X-Test-Mode header)
+ */
+if (!function_exists('is_test_mode')) {
+function is_test_mode() {
+    // Check for X-Test-Mode header
+    if (isset($_SERVER['HTTP_X_TEST_MODE']) && $_SERVER['HTTP_X_TEST_MODE'] === '1') {
+        return true;
+    }
+    return false;
+}
+}
+
+/**
+ * Get database path based on mode (test or production)
+ */
+if (!function_exists('get_db_path')) {
+function get_db_path() {
+    $base_path = getenv('SQLITE_DB') ?: '/var/www/html/data/compta.db';
+
+    if (is_test_mode()) {
+        // Use test database in same directory
+        $dir = dirname($base_path);
+        return $dir . '/compta_test.db';
+    }
+
+    return $base_path;
+}
+}
+
+/**
  * Connect to SQLite database
  */
 if (!function_exists('db_connect')) {
@@ -61,7 +91,7 @@ function db_connect() {
         return $db_pdo;
     }
 
-    $db_path = getenv('SQLITE_DB') ?: '/var/www/html/data/compta.db';
+    $db_path = get_db_path();
 
     // Ensure directory exists
     $dir = dirname($db_path);
