@@ -5,25 +5,19 @@
 
 $page_title = 'Journal';
 require_once __DIR__ . '/../../header.php';
-require_role('accountant');
+require_login();
 
 // Filters
 $journal_id = get('journal_id', '');
-$period_id = get('period_id', '');
 
-// Get journals and periods for filters
+// Get journals for filters
 $journals = get_journals();
-$periods = get_periods();
 
 // Build query conditions
 $where = "e.status = 'posted'";
 if ($journal_id) {
     $journal_id_int = intval($journal_id);
     $where .= " AND e.journal_id = $journal_id_int";
-}
-if ($period_id) {
-    $period_id_int = intval($period_id);
-    $where .= " AND e.period_id = $period_id_int";
 }
 
 // Get entries with lines
@@ -55,7 +49,7 @@ foreach ($entries as $entry) {
 }
 ?>
 
-<h2>Etat du Journal</h2>
+<h2>État du Journal</h2>
 
 <!-- Filters -->
 <div class="filters">
@@ -70,34 +64,23 @@ foreach ($entries as $entry) {
             <?php endforeach; ?>
         </select>
 
-        <label>Periode:</label>
-        <select name="period_id">
-            <option value="">Toutes</option>
-            <?php foreach ($periods as $p): ?>
-            <option value="<?php echo $p['id']; ?>" <?php echo get('period_id') == $p['id'] ? 'selected' : ''; ?>>
-                <?php echo format_date($p['start_date']) . ' - ' . format_date($p['end_date']); ?>
-            </option>
-            <?php endforeach; ?>
-        </select>
-
         <button type="submit" class="btn btn-small">Afficher</button>
         <a href="/modules/reports/journal.php" class="btn btn-small">Reset</a>
-        <a href="/modules/reports/pdf_journal.php?<?php echo http_build_query($_GET); ?>" class="btn btn-small" target="_blank">PDF</a>
     </form>
 </div>
 
 <!-- Summary -->
 <div class="dashboard-row mb-20">
     <div class="stat-box">
-        <h3>Nb Pieces</h3>
+        <h3>Nb Pièces</h3>
         <p class="big-number"><?php echo count($entries); ?></p>
     </div>
     <div class="stat-box">
-        <h3>Total Debit</h3>
+        <h3>Total Débit</h3>
         <p class="big-number"><?php echo format_money($grand_debit); ?></p>
     </div>
     <div class="stat-box">
-        <h3>Total Credit</h3>
+        <h3>Total Crédit</h3>
         <p class="big-number"><?php echo format_money($grand_credit); ?></p>
     </div>
 </div>
@@ -119,11 +102,11 @@ foreach ($entries as $entry) {
             <thead>
                 <tr>
                     <th>Date</th>
-                    <th>N&deg; Piece</th>
+                    <th>N° Pièce</th>
                     <th>Compte</th>
-                    <th>Libelle</th>
-                    <th>Debit</th>
-                    <th>Credit</th>
+                    <th>Libellé</th>
+                    <th>Débit</th>
+                    <th>Crédit</th>
                 </tr>
             </thead>
             <tbody>
@@ -147,7 +130,7 @@ foreach ($entries as $entry) {
                 </tr>
                 <?php endforeach; ?>
                 <tr>
-                    <td colspan="4" class="text-right"><em>Total piece:</em></td>
+                    <td colspan="4" class="text-right"><em>Total pièce :</em></td>
                     <td class="number"><em><?php echo format_money($entry['total_debit']); ?></em></td>
                     <td class="number"><em><?php echo format_money($entry['total_credit']); ?></em></td>
                 </tr>
@@ -158,12 +141,12 @@ foreach ($entries as $entry) {
     </div>
 
     <div class="report-totals" style="padding: 10px; background: #003366; color: white;">
-        <strong>TOTAL GENERAL:</strong>
-        Debit: <?php echo format_money($grand_debit); ?> |
-        Credit: <?php echo format_money($grand_credit); ?>
+        <strong>TOTAL GÉNÉRAL :</strong>
+        Débit : <?php echo format_money($grand_debit); ?> |
+        Crédit : <?php echo format_money($grand_credit); ?>
     </div>
 <?php else: ?>
-<p>Aucune donnee pour les criteres selectionnes.</p>
+<p>Aucune donnée pour les critères sélectionnés.</p>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../../footer.php'; ?>

@@ -186,7 +186,7 @@ function pagination_links($pagination, $base_url) {
 
     // Previous
     if ($pagination['has_prev']) {
-        $html .= '<a href="' . $base_url . '&page=' . ($pagination['page'] - 1) . '">&laquo; Precedent</a> ';
+        $html .= '<a href="' . $base_url . '&page=' . ($pagination['page'] - 1) . '">&laquo; Précédent</a> ';
     }
 
     // Page numbers
@@ -206,37 +206,6 @@ function pagination_links($pagination, $base_url) {
     $html .= '</div>';
 
     return $html;
-}
-
-/**
- * Get period for a date
- */
-function get_period_for_date($date) {
-    $date = db_escape($date);
-    $sql = "SELECT id, status FROM periods WHERE '$date' BETWEEN start_date AND end_date LIMIT 1";
-    $result = db_query($sql);
-
-    if (db_num_rows($result) > 0) {
-        return db_fetch_assoc($result);
-    }
-
-    return null;
-}
-
-/**
- * Check if period is open
- */
-function is_period_open($period_id) {
-    $period_id = intval($period_id);
-    $sql = "SELECT status FROM periods WHERE id = $period_id";
-    $result = db_query($sql);
-
-    if (db_num_rows($result) > 0) {
-        $row = db_fetch_assoc($result);
-        return $row['status'] === 'open';
-    }
-
-    return false;
 }
 
 /**
@@ -266,42 +235,6 @@ function get_accounts($active_only = true, $type = null) {
     }
     $sql .= " ORDER BY code";
 
-    return db_fetch_all(db_query($sql));
-}
-
-/**
- * Get all third parties
- */
-function get_third_parties($type = null) {
-    $sql = "SELECT tp.*, a.code as account_code FROM third_parties tp
-            LEFT JOIN accounts a ON tp.account_id = a.id WHERE 1=1";
-    if ($type !== null) {
-        $type = db_escape($type);
-        $sql .= " AND tp.type = '$type'";
-    }
-    $sql .= " ORDER BY tp.name";
-
-    return db_fetch_all(db_query($sql));
-}
-
-/**
- * Get all VAT rates
- */
-function get_vat_rates($active_only = true) {
-    $sql = "SELECT * FROM vat_rates";
-    if ($active_only) {
-        $sql .= " WHERE is_active = 1";
-    }
-    $sql .= " ORDER BY rate DESC";
-
-    return db_fetch_all(db_query($sql));
-}
-
-/**
- * Get all periods
- */
-function get_periods() {
-    $sql = "SELECT * FROM periods ORDER BY start_date";
     return db_fetch_all(db_query($sql));
 }
 
@@ -346,46 +279,4 @@ function generate_piece_number($journal_id) {
 function validate_double_entry($total_debit, $total_credit) {
     $diff = abs($total_debit - $total_credit);
     return $diff <= 0.01; // Tolerance of 0.01
-}
-
-/**
- * Handle file upload
- */
-function handle_upload($file_input, $entry_id) {
-    if (!isset($_FILES[$file_input]) || $_FILES[$file_input]['error'] !== UPLOAD_ERR_OK) {
-        return null;
-    }
-
-    $file = $_FILES[$file_input];
-
-    // Check size (max 5MB)
-    if ($file['size'] > 5 * 1024 * 1024) {
-        return array('error' => 'Fichier trop volumineux (max 5MB)');
-    }
-
-    // Check extension
-    $allowed = array('pdf', 'jpg', 'jpeg', 'png', 'gif');
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-    if (!in_array($ext, $allowed)) {
-        return array('error' => 'Type de fichier non autorise');
-    }
-
-    // Prevent PHP file upload
-    if (strtolower($ext) === 'php') {
-        return array('error' => 'Type de fichier interdit');
-    }
-
-    // Generate filename
-    $filename = 'entry_' . $entry_id . '_' . time() . '.' . $ext;
-    $dest_path = '/var/www/html/uploads/' . $filename;
-
-    if (move_uploaded_file($file['tmp_name'], $dest_path)) {
-        return array(
-            'filename' => $file['name'],
-            'stored_path' => $filename
-        );
-    }
-
-    return array('error' => 'Erreur lors de l\'upload');
 }

@@ -8,7 +8,6 @@ require_once __DIR__ . '/../../lib/auth.php';
 require_once __DIR__ . '/../../lib/utils.php';
 
 require_login();
-require_role('admin');
 
 $current_user_id = auth_user_id();
 
@@ -24,11 +23,11 @@ if (is_post() && post('action') === 'delete') {
         $sql = "SELECT COUNT(*) as count FROM entries WHERE created_by = $id";
         $result = db_query($sql);
         if (db_fetch_assoc($result)['count'] > 0) {
-            set_flash('error', 'Impossible de supprimer: cet utilisateur a cree des ecritures.');
+            set_flash('error', 'Impossible de supprimer : cet utilisateur a créé des écritures.');
         } else {
             db_query("DELETE FROM users WHERE id = $id");
             audit_log('DELETE', 'users', $id, 'User deleted');
-            set_flash('success', 'Utilisateur supprime.');
+            set_flash('success', 'Utilisateur supprimé.');
         }
     }
     redirect('/modules/admin/users.php');
@@ -40,19 +39,17 @@ if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
 
     $id = intval(post('id'));
     $username = db_escape(trim(post('username')));
-    $role = db_escape(post('role'));
     $password = post('password');
 
     // Validation
     $errors = array();
     if (empty($username)) $errors[] = 'Le nom d\'utilisateur est obligatoire.';
-    if (!in_array($role, array('admin', 'accountant', 'viewer'))) $errors[] = 'Role invalide.';
 
     // Check unique username
     $sql = "SELECT id FROM users WHERE username = '$username' AND id != $id";
     $result = db_query($sql);
     if (db_num_rows($result) > 0) {
-        $errors[] = 'Ce nom d\'utilisateur existe deja.';
+        $errors[] = 'Ce nom d\'utilisateur existe déjà.';
     }
 
     // Password required for new users
@@ -63,15 +60,15 @@ if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
     if (empty($errors)) {
         if (post('action') === 'create') {
             $password_hash = auth_hash_password($password);
-            $sql = "INSERT INTO users (username, password_hash, role, created_at)
-                    VALUES ('$username', '$password_hash', '$role', NOW())";
+            $sql = "INSERT INTO users (username, password_hash, created_at)
+                    VALUES ('$username', '$password_hash', datetime('now'))";
             db_query($sql);
             $id = db_insert_id();
             audit_log('CREATE', 'users', $id, "User $username created");
-            set_flash('success', 'Utilisateur cree.');
+            set_flash('success', 'Utilisateur créé.');
         } else {
             // Update
-            $sql = "UPDATE users SET username = '$username', role = '$role'";
+            $sql = "UPDATE users SET username = '$username'";
 
             // Update password if provided
             if (!empty($password)) {
@@ -82,7 +79,7 @@ if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
             $sql .= " WHERE id = $id";
             db_query($sql);
             audit_log('UPDATE', 'users', $id, "User $username updated");
-            set_flash('success', 'Utilisateur mis a jour.');
+            set_flash('success', 'Utilisateur mis à jour.');
         }
         redirect('/modules/admin/users.php');
     } else {
@@ -133,24 +130,10 @@ require_once __DIR__ . '/../../header.php';
                 <label for="password">Mot de passe <?php echo $edit_user ? '(laisser vide pour conserver)' : '*'; ?></label>
                 <input type="password" id="password" name="password" <?php echo $edit_user ? '' : 'required'; ?>>
             </div>
-            <div class="form-group">
-                <label for="role">Role *</label>
-                <select id="role" name="role" required>
-                    <option value="viewer" <?php echo ($edit_user && $edit_user['role'] == 'viewer') ? 'selected' : ''; ?>>
-                        Lecture seule
-                    </option>
-                    <option value="accountant" <?php echo ($edit_user && $edit_user['role'] == 'accountant') ? 'selected' : (!$edit_user ? 'selected' : ''); ?>>
-                        Comptable
-                    </option>
-                    <option value="admin" <?php echo ($edit_user && $edit_user['role'] == 'admin') ? 'selected' : ''; ?>>
-                        Administrateur
-                    </option>
-                </select>
-            </div>
         </div>
 
         <button type="submit" class="btn btn-primary">
-            <?php echo $edit_user ? 'Mettre a jour' : 'Creer'; ?>
+            <?php echo $edit_user ? 'Mettre à jour' : 'Créer'; ?>
         </button>
         <?php if ($edit_user): ?>
         <a href="/modules/admin/users.php" class="btn">Annuler</a>
@@ -164,10 +147,9 @@ require_once __DIR__ . '/../../header.php';
         <tr>
             <th>ID</th>
             <th>Nom d'utilisateur</th>
-            <th>Role</th>
-            <th>Cree le</th>
-            <th>Derniere connexion</th>
-            <th>Nb ecritures</th>
+            <th>Créé le</th>
+            <th>Dernière connexion</th>
+            <th>Nb écritures</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -180,16 +162,6 @@ require_once __DIR__ . '/../../header.php';
                 <?php if ($user['id'] == $current_user_id): ?>
                 <span style="color: green;">(vous)</span>
                 <?php endif; ?>
-            </td>
-            <td>
-                <?php
-                $roles = array(
-                    'admin' => 'Administrateur',
-                    'accountant' => 'Comptable',
-                    'viewer' => 'Lecture seule'
-                );
-                echo isset($roles[$user['role']]) ? $roles[$user['role']] : $user['role'];
-                ?>
             </td>
             <td><?php echo format_datetime($user['created_at']); ?></td>
             <td><?php echo $user['last_login'] ? format_datetime($user['last_login']) : 'Jamais'; ?></td>
@@ -210,31 +182,5 @@ require_once __DIR__ . '/../../header.php';
         <?php endforeach; ?>
     </tbody>
 </table>
-
-<div class="mt-20">
-    <h3>Roles et permissions</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Role</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>Administrateur</strong></td>
-                <td>Acces complet: parametrage, utilisateurs, cloture, toutes les operations comptables</td>
-            </tr>
-            <tr>
-                <td><strong>Comptable</strong></td>
-                <td>Saisie, validation, lettrage, pointage, consultation des etats</td>
-            </tr>
-            <tr>
-                <td><strong>Lecture seule</strong></td>
-                <td>Consultation uniquement des etats et ecritures validees</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
 
 <?php require_once __DIR__ . '/../../footer.php'; ?>

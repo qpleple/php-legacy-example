@@ -29,7 +29,7 @@ class LoginTest extends FunctionalTestCase
             'password' => 'admin123'
         ));
 
-        $this->assertRedirectTo('/index.php', $response);
+        $this->assertRedirectTo('/dashboard.php', $response);
     }
 
     function testLoginWithInvalidCredentials()
@@ -45,20 +45,6 @@ class LoginTest extends FunctionalTestCase
         $this->assertContains($response['code'], array(200, 302));
     }
 
-    function testLoginWithoutCsrfToken()
-    {
-        $this->requireApp();
-
-        // Legacy app allows login without CSRF
-        $response = $this->post('/login.php', array(
-            'username' => 'admin',
-            'password' => 'admin123',
-            '_csrf' => ''
-        ));
-
-        $this->assertRedirectTo('/index.php', $response);
-    }
-
     function testProtectedPageRedirectsToLogin()
     {
         $this->requireApp();
@@ -68,13 +54,14 @@ class LoginTest extends FunctionalTestCase
         $this->assertRedirectTo('login.php', $response);
     }
 
-    function testDashboardRedirectsToLogin()
+    function testLandingPageLoads()
     {
         $this->requireApp();
 
         $response = $this->get('/index.php');
 
-        $this->assertEquals(302, $response['code']);
+        $this->assertOk($response);
+        $this->assertSee('Ketchup', $response);
     }
 
     function testLogoutDestroysSession()
@@ -94,7 +81,7 @@ class LoginTest extends FunctionalTestCase
 
         $this->loginAs('admin');
 
-        $response = $this->get('/index.php');
+        $response = $this->get('/dashboard.php');
 
         $this->assertOk($response);
         $this->assertSee('Tableau de bord', $response);

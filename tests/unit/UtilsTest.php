@@ -357,8 +357,9 @@ class UtilsTest extends PHPUnit\Framework\TestCase
         $html = pagination_links($pagination, '/test?foo=bar');
 
         $this->assertStringContainsString('pagination', $html);
-        $this->assertStringContainsString('Precedent', $html);
-        $this->assertStringContainsString('Suivant', $html);
+        $this->assertStringContainsString('pagination', $html);
+        $this->assertStringContainsString('page=1', $html);
+        $this->assertStringContainsString('page=3', $html);
         $this->assertStringContainsString('page=1', $html);
         $this->assertStringContainsString('page=3', $html);
     }

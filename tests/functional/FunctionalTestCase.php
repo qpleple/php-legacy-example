@@ -177,7 +177,7 @@ class FunctionalTestCase extends PHPUnit\Framework\TestCase
             'password' => $password
         ));
 
-        $this->assertRedirectTo('/index.php', $response, 'Login failed for ' . $username);
+        $this->assertRedirectTo('/dashboard.php', $response, 'Login failed for ' . $username);
     }
 
     /**

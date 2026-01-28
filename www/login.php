@@ -11,7 +11,7 @@ auth_start_session();
 
 // Already logged in?
 if (auth_is_logged_in()) {
-    redirect('/index.php');
+    redirect('/dashboard.php');
 }
 
 $error = '';
@@ -25,8 +25,8 @@ if (is_post()) {
         $error = 'Veuillez remplir tous les champs.';
     } else {
         if (auth_login($username, $password)) {
-            set_flash('success', 'Connexion reussie. Bienvenue!');
-            redirect('/index.php');
+            set_flash('success', 'Connexion réussie. Bienvenue !');
+            redirect('/dashboard.php');
         } else {
             $error = 'Identifiants incorrects.';
         }
@@ -75,7 +75,10 @@ $page_title = 'Connexion';
             </form>
 
             <p class="hint">
-                <small>Utilisateur par defaut: admin / admin123</small>
+                <small>Utilisateur par défaut : admin / admin123</small>
+            </p>
+            <p class="hint">
+                <a href="/">Retour à l'accueil</a>
             </p>
         </div>
     </div>

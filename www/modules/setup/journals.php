@@ -8,7 +8,6 @@ require_once __DIR__ . '/../../lib/auth.php';
 require_once __DIR__ . '/../../lib/utils.php';
 
 require_login();
-require_role('admin');
 
 // Handle delete
 if (is_post() && post('action') === 'delete') {
@@ -19,11 +18,11 @@ if (is_post() && post('action') === 'delete') {
     $sql = "SELECT COUNT(*) as count FROM entries WHERE journal_id = $id";
     $result = db_query($sql);
     if (db_fetch_assoc($result)['count'] > 0) {
-        set_flash('error', 'Impossible de supprimer: ce journal contient des ecritures.');
+        set_flash('error', 'Impossible de supprimer : ce journal contient des écritures.');
     } else {
         db_query("DELETE FROM journals WHERE id = $id");
         audit_log('DELETE', 'journals', $id, 'Journal deleted');
-        set_flash('success', 'Journal supprime.');
+        set_flash('success', 'Journal supprimé.');
     }
     redirect('/modules/setup/journals.php');
 }
@@ -44,14 +43,14 @@ if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
     // Validation
     $errors = array();
     if (empty($code)) $errors[] = 'Le code est obligatoire.';
-    if (empty($label)) $errors[] = 'Le libelle est obligatoire.';
-    if (empty($sequence_prefix)) $errors[] = 'Le prefixe est obligatoire.';
+    if (empty($label)) $errors[] = 'Le libellé est obligatoire.';
+    if (empty($sequence_prefix)) $errors[] = 'Le préfixe est obligatoire.';
 
     // Check unique code
     $sql = "SELECT id FROM journals WHERE code = '$code' AND id != $id";
     $result = db_query($sql);
     if (db_num_rows($result) > 0) {
-        $errors[] = 'Ce code de journal existe deja.';
+        $errors[] = 'Ce code de journal existe déjà.';
     }
 
     if (empty($errors)) {
@@ -61,13 +60,13 @@ if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
             db_query($sql);
             $id = db_insert_id();
             audit_log('CREATE', 'journals', $id, "Journal $code created");
-            set_flash('success', 'Journal cree.');
+            set_flash('success', 'Journal créé.');
         } else {
             $sql = "UPDATE journals SET code = '$code', label = '$label', sequence_prefix = '$sequence_prefix',
                     next_number = $next_number, is_active = $is_active WHERE id = $id";
             db_query($sql);
             audit_log('UPDATE', 'journals', $id, "Journal $code updated");
-            set_flash('success', 'Journal mis a jour.');
+            set_flash('success', 'Journal mis à jour.');
         }
         redirect('/modules/setup/journals.php');
     } else {
@@ -113,17 +112,17 @@ require_once __DIR__ . '/../../header.php';
                 <small>(ex: VE, AC, BK, OD)</small>
             </div>
             <div class="form-group">
-                <label for="label">Libelle *</label>
+                <label for="label">Libellé *</label>
                 <input type="text" id="label" name="label" style="width: 250px;"
                        value="<?php echo h($edit_journal ? $edit_journal['label'] : ''); ?>" required>
             </div>
             <div class="form-group">
-                <label for="sequence_prefix">Prefixe sequence *</label>
+                <label for="sequence_prefix">Préfixe séquence *</label>
                 <input type="text" id="sequence_prefix" name="sequence_prefix" maxlength="10" style="width: 100px;"
                        value="<?php echo h($edit_journal ? $edit_journal['sequence_prefix'] : ''); ?>" required>
             </div>
             <div class="form-group">
-                <label for="next_number">Prochain numero</label>
+                <label for="next_number">Prochain numéro</label>
                 <input type="number" id="next_number" name="next_number" min="1" style="width: 100px;"
                        value="<?php echo $edit_journal ? $edit_journal['next_number'] : 1; ?>">
             </div>
@@ -137,7 +136,7 @@ require_once __DIR__ . '/../../header.php';
         </div>
 
         <button type="submit" class="btn btn-primary">
-            <?php echo $edit_journal ? 'Mettre a jour' : 'Creer'; ?>
+            <?php echo $edit_journal ? 'Mettre à jour' : 'Créer'; ?>
         </button>
         <?php if ($edit_journal): ?>
         <a href="/modules/setup/journals.php" class="btn">Annuler</a>
@@ -150,10 +149,10 @@ require_once __DIR__ . '/../../header.php';
     <thead>
         <tr>
             <th>Code</th>
-            <th>Libelle</th>
-            <th>Prefixe</th>
-            <th>Prochain N&deg;</th>
-            <th>Nb ecritures</th>
+            <th>Libellé</th>
+            <th>Préfixe</th>
+            <th>Prochain N°</th>
+            <th>Nb écritures</th>
             <th>Actif</th>
             <th>Actions</th>
         </tr>
@@ -185,7 +184,7 @@ require_once __DIR__ . '/../../header.php';
 </table>
 
 <div class="mt-20">
-    <p><strong>Note:</strong> Le format des numeros de piece est: PREFIXE + ANNEE + '-' + NUMERO (ex: VE2024-000001)</p>
+    <p><strong>Note :</strong> Le format des numéros de pièce est : PRÉFIXE + ANNÉE + '-' + NUMÉRO (ex : VE2024-000001)</p>
 </div>
 
 <?php require_once __DIR__ . '/../../footer.php'; ?>

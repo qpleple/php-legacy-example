@@ -8,7 +8,6 @@ require_once __DIR__ . '/../../lib/auth.php';
 require_once __DIR__ . '/../../lib/utils.php';
 
 require_login();
-require_role('accountant');
 
 // Handle delete
 if (is_post() && post('action') === 'delete') {
@@ -19,11 +18,11 @@ if (is_post() && post('action') === 'delete') {
     $sql = "SELECT COUNT(*) as count FROM entry_lines WHERE account_id = $id";
     $result = db_query($sql);
     if (db_fetch_assoc($result)['count'] > 0) {
-        set_flash('error', 'Impossible de supprimer: ce compte est utilise dans des ecritures.');
+        set_flash('error', 'Impossible de supprimer : ce compte est utilisé dans des écritures.');
     } else {
         db_query("DELETE FROM accounts WHERE id = $id");
         audit_log('DELETE', 'accounts', $id, 'Account deleted');
-        set_flash('success', 'Compte supprime.');
+        set_flash('success', 'Compte supprimé.');
     }
     redirect('/modules/setup/accounts.php');
 }
@@ -41,13 +40,13 @@ if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
     // Validation
     $errors = array();
     if (empty($code)) $errors[] = 'Le code est obligatoire.';
-    if (empty($label)) $errors[] = 'Le libelle est obligatoire.';
+    if (empty($label)) $errors[] = 'Le libellé est obligatoire.';
 
     // Check unique code
     $sql = "SELECT id FROM accounts WHERE code = '$code' AND id != $id";
     $result = db_query($sql);
     if (db_num_rows($result) > 0) {
-        $errors[] = 'Ce code de compte existe deja.';
+        $errors[] = 'Ce code de compte existe déjà.';
     }
 
     if (empty($errors)) {
@@ -57,13 +56,13 @@ if (is_post() && (post('action') === 'create' || post('action') === 'update')) {
             db_query($sql);
             $id = db_insert_id();
             audit_log('CREATE', 'accounts', $id, "Account $code created");
-            set_flash('success', 'Compte cree.');
+            set_flash('success', 'Compte créé.');
         } else {
             $sql = "UPDATE accounts SET code = '$code', label = '$label', type = '$type', is_active = $is_active
                     WHERE id = $id";
             db_query($sql);
             audit_log('UPDATE', 'accounts', $id, "Account $code updated");
-            set_flash('success', 'Compte mis a jour.');
+            set_flash('success', 'Compte mis à jour.');
         }
         redirect('/modules/setup/accounts.php');
     } else {
@@ -113,7 +112,7 @@ if (is_post() && post('action') === 'import') {
 
         fclose($file);
         audit_log('IMPORT', 'accounts', 0, "Imported $count accounts from CSV");
-        set_flash('success', "$count comptes importes.");
+        set_flash('success', "$count comptes importés.");
         redirect('/modules/setup/accounts.php');
     }
 }
@@ -140,7 +139,7 @@ $page = max(1, intval(get('page', 1)));
 $pagination = paginate($total, $page, 50);
 
 // Get accounts
-$sql = "SELECT * FROM accounts WHERE $where ORDER BY code LIMIT {$pagination['offset']}, {$pagination['per_page']}";
+$sql = "SELECT * FROM accounts WHERE $where ORDER BY code LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
 $accounts = db_fetch_all(db_query($sql));
 
 // Edit mode
@@ -175,14 +174,14 @@ require_once __DIR__ . '/../../header.php';
                        value="<?php echo h($edit_account ? $edit_account['code'] : ''); ?>" required>
             </div>
             <div class="form-group">
-                <label for="label">Libelle *</label>
+                <label for="label">Libellé *</label>
                 <input type="text" id="label" name="label" style="width: 300px;"
                        value="<?php echo h($edit_account ? $edit_account['label'] : ''); ?>" required>
             </div>
             <div class="form-group">
                 <label for="type">Type</label>
                 <select id="type" name="type">
-                    <option value="general" <?php echo ($edit_account && $edit_account['type'] == 'general') ? 'selected' : ''; ?>>General</option>
+                    <option value="general" <?php echo ($edit_account && $edit_account['type'] == 'general') ? 'selected' : ''; ?>>Général</option>
                     <option value="customer" <?php echo ($edit_account && $edit_account['type'] == 'customer') ? 'selected' : ''; ?>>Client</option>
                     <option value="vendor" <?php echo ($edit_account && $edit_account['type'] == 'vendor') ? 'selected' : ''; ?>>Fournisseur</option>
                 </select>
@@ -197,7 +196,7 @@ require_once __DIR__ . '/../../header.php';
         </div>
 
         <button type="submit" class="btn btn-primary">
-            <?php echo $edit_account ? 'Mettre a jour' : 'Creer'; ?>
+            <?php echo $edit_account ? 'Mettre à jour' : 'Créer'; ?>
         </button>
         <?php if ($edit_account): ?>
         <a href="/modules/setup/accounts.php" class="btn">Annuler</a>
@@ -221,11 +220,11 @@ require_once __DIR__ . '/../../header.php';
 <div class="filters">
     <form method="get" action="">
         <label>Recherche:</label>
-        <input type="text" name="search" value="<?php echo h($search); ?>" placeholder="Code ou libelle">
+        <input type="text" name="search" value="<?php echo h($search); ?>" placeholder="Code ou libellé">
         <label>Type:</label>
         <select name="type">
             <option value="">Tous</option>
-            <option value="general" <?php echo $type_filter == 'general' ? 'selected' : ''; ?>>General</option>
+            <option value="general" <?php echo $type_filter == 'general' ? 'selected' : ''; ?>>Général</option>
             <option value="customer" <?php echo $type_filter == 'customer' ? 'selected' : ''; ?>>Client</option>
             <option value="vendor" <?php echo $type_filter == 'vendor' ? 'selected' : ''; ?>>Fournisseur</option>
         </select>
@@ -239,7 +238,7 @@ require_once __DIR__ . '/../../header.php';
     <thead>
         <tr>
             <th>Code</th>
-            <th>Libelle</th>
+            <th>Libellé</th>
             <th>Type</th>
             <th>Actif</th>
             <th>Actions</th>

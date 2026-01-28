@@ -36,7 +36,7 @@ function auth_verify_password($password, $hash) {
 function auth_login($username, $password) {
     $username = db_escape($username);
 
-    $sql = "SELECT id, username, password_hash, role FROM users WHERE username = '$username'";
+    $sql = "SELECT id, username, password_hash FROM users WHERE username = '$username'";
     $result = db_query($sql);
 
     if (db_num_rows($result) === 0) {
@@ -52,7 +52,6 @@ function auth_login($username, $password) {
     // Set session
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['username'] = $user['username'];
-    $_SESSION['role'] = $user['role'];
     $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
 
     // Log login
@@ -100,56 +99,12 @@ function auth_username() {
 }
 
 /**
- * Get current user role
- */
-function auth_role() {
-    auth_start_session();
-    return isset($_SESSION['role']) ? $_SESSION['role'] : null;
-}
-
-/**
- * Check if current user has required role (with hierarchy)
- * admin > accountant > viewer
- */
-function auth_has_role($required_role) {
-    $current_role = auth_role();
-
-    if ($current_role === null) {
-        return false;
-    }
-
-    $hierarchy = array(
-        'viewer' => 1,
-        'accountant' => 2,
-        'admin' => 3
-    );
-
-    $current_level = isset($hierarchy[$current_role]) ? $hierarchy[$current_role] : 0;
-    $required_level = isset($hierarchy[$required_role]) ? $hierarchy[$required_role] : 0;
-
-    return $current_level >= $required_level;
-}
-
-/**
  * Require login - redirect if not logged in
  */
 function require_login() {
     if (!auth_is_logged_in()) {
         set_flash('error', 'Veuillez vous connecter.');
         header('Location: /login.php');
-        exit;
-    }
-}
-
-/**
- * Require specific role - redirect if not authorized
- */
-function require_role($role) {
-    require_login();
-
-    if (!auth_has_role($role)) {
-        set_flash('error', 'Acces non autorise.');
-        header('Location: /index.php');
         exit;
     }
 }
@@ -190,7 +145,7 @@ function csrf_verify() {
  */
 function require_csrf() {
     if (!csrf_verify()) {
-        set_flash('error', 'Token de securite invalide. Veuillez reessayer.');
+        set_flash('error', 'Token de sécurité invalide. Veuillez réessayer.');
         header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
     }

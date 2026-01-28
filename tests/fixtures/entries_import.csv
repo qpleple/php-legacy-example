@@ -1,4 +1,0 @@
-date;journal_code;label;account_code;third_party_name;debit;credit;vat_rate_label;due_date;piece_ref
-15/01/2026;VE;Facture Client Import;411000;;1200,00;0,00;;15/02/2026;FACIMP01
-15/01/2026;VE;Facture Client Import;707000;;0,00;1000,00;;;FACIMP01
-15/01/2026;VE;Facture Client Import;44571;;0,00;200,00;;;FACIMP01

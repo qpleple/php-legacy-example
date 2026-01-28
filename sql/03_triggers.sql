@@ -46,19 +46,7 @@ BEGIN
 END;
 
 -- ==============================================
--- TRAP 4: Cascade lock - lock entries when period locked
--- ==============================================
-CREATE TRIGGER IF NOT EXISTS trg_period_lock_cascade
-AFTER UPDATE OF status ON periods
-WHEN NEW.status = 'locked' AND OLD.status = 'open'
-BEGIN
-    UPDATE entries
-    SET status = 'posted'
-    WHERE period_id = NEW.id AND status = 'draft';
-END;
-
--- ==============================================
--- TRAP 5: Silent audit on sensitive deletes
+-- TRAP 4: Silent audit on sensitive deletes
 -- ==============================================
 CREATE TRIGGER IF NOT EXISTS trg_audit_account_delete
 BEFORE DELETE ON accounts

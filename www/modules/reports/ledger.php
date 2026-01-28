@@ -5,24 +5,18 @@
 
 $page_title = 'Grand Livre';
 require_once __DIR__ . '/../../header.php';
-require_role('accountant');
+require_login();
 
 // Filters
-$period_id = get('period_id', '');
 $account_from = get('account_from', '');
 $account_to = get('account_to', '');
 $journal_id = get('journal_id', '');
 
-// Get periods and journals for filters
-$periods = get_periods();
+// Get journals for filters
 $journals = get_journals();
 
 // Build query conditions
 $where = "e.status = 'posted'";
-if ($period_id) {
-    $period_id = intval($period_id);
-    $where .= " AND e.period_id = $period_id";
-}
 if ($account_from) {
     $account_from_esc = db_escape($account_from);
     $where .= " AND a.code >= '$account_from_esc'";
@@ -80,20 +74,10 @@ foreach ($ledger as $acc) {
 <!-- Filters -->
 <div class="filters">
     <form method="get" action="">
-        <label>Periode:</label>
-        <select name="period_id">
-            <option value="">Toutes</option>
-            <?php foreach ($periods as $p): ?>
-            <option value="<?php echo $p['id']; ?>" <?php echo get('period_id') == $p['id'] ? 'selected' : ''; ?>>
-                <?php echo format_date($p['start_date']) . ' - ' . format_date($p['end_date']); ?>
-            </option>
-            <?php endforeach; ?>
-        </select>
-
         <label>Compte de:</label>
         <input type="text" name="account_from" value="<?php echo h($account_from); ?>" style="width: 80px;" placeholder="101000">
 
-        <label>a:</label>
+        <label>à :</label>
         <input type="text" name="account_to" value="<?php echo h($account_to); ?>" style="width: 80px;" placeholder="999999">
 
         <label>Journal:</label>
@@ -108,18 +92,17 @@ foreach ($ledger as $acc) {
 
         <button type="submit" class="btn btn-small">Afficher</button>
         <a href="/modules/reports/ledger.php" class="btn btn-small">Reset</a>
-        <a href="/modules/reports/pdf_ledger.php?<?php echo http_build_query($_GET); ?>" class="btn btn-small" target="_blank">PDF</a>
     </form>
 </div>
 
 <!-- Grand totals -->
 <div class="dashboard-row mb-20">
     <div class="stat-box">
-        <h3>Total Debit</h3>
+        <h3>Total Débit</h3>
         <p class="big-number"><?php echo format_money($grand_debit); ?></p>
     </div>
     <div class="stat-box">
-        <h3>Total Credit</h3>
+        <h3>Total Crédit</h3>
         <p class="big-number"><?php echo format_money($grand_credit); ?></p>
     </div>
     <div class="stat-box">
@@ -138,10 +121,10 @@ foreach ($ledger as $acc) {
                 <tr>
                     <th>Date</th>
                     <th>Journal</th>
-                    <th>N&deg; Piece</th>
-                    <th>Libelle</th>
-                    <th>Debit</th>
-                    <th>Credit</th>
+                    <th>N° Pièce</th>
+                    <th>Libellé</th>
+                    <th>Débit</th>
+                    <th>Crédit</th>
                     <th>Solde</th>
                 </tr>
             </thead>
@@ -174,7 +157,7 @@ foreach ($ledger as $acc) {
     </div>
     <?php endforeach; ?>
 <?php else: ?>
-<p>Aucune donnee pour les criteres selectionnes.</p>
+<p>Aucune donnée pour les critères sélectionnés.</p>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../../footer.php'; ?>

@@ -111,65 +111,6 @@ class AuthTest extends PHPUnit\Framework\TestCase
         $this->assertNull(auth_username());
     }
 
-    // ==================== auth_role() tests ====================
-
-    public function testRoleReturnsRole()
-    {
-        $_SESSION['role'] = 'admin';
-        $this->assertEquals('admin', auth_role());
-    }
-
-    public function testRoleReturnsNullWhenNotLoggedIn()
-    {
-        unset($_SESSION['role']);
-        $this->assertNull(auth_role());
-    }
-
-    // ==================== auth_has_role() tests ====================
-
-    public function testHasRoleAdminHasAllRoles()
-    {
-        $_SESSION['role'] = 'admin';
-
-        $this->assertTrue(auth_has_role('admin'));
-        $this->assertTrue(auth_has_role('accountant'));
-        $this->assertTrue(auth_has_role('viewer'));
-    }
-
-    public function testHasRoleAccountantHasAccountantAndViewer()
-    {
-        $_SESSION['role'] = 'accountant';
-
-        $this->assertFalse(auth_has_role('admin'));
-        $this->assertTrue(auth_has_role('accountant'));
-        $this->assertTrue(auth_has_role('viewer'));
-    }
-
-    public function testHasRoleViewerOnlyHasViewer()
-    {
-        $_SESSION['role'] = 'viewer';
-
-        $this->assertFalse(auth_has_role('admin'));
-        $this->assertFalse(auth_has_role('accountant'));
-        $this->assertTrue(auth_has_role('viewer'));
-    }
-
-    public function testHasRoleNoRoleHasNothing()
-    {
-        unset($_SESSION['role']);
-
-        $this->assertFalse(auth_has_role('admin'));
-        $this->assertFalse(auth_has_role('accountant'));
-        $this->assertFalse(auth_has_role('viewer'));
-    }
-
-    public function testHasRoleUnknownRoleRequired()
-    {
-        $_SESSION['role'] = 'admin';
-        // Unknown required role has level 0, so any logged-in user should pass
-        $this->assertTrue(auth_has_role('unknown'));
-    }
-
     // ==================== csrf_token() tests ====================
 
     public function testCsrfTokenGeneratesToken()

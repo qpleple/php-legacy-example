@@ -118,24 +118,15 @@ db_query("INSERT INTO accounts (code, label) VALUES ('" . db_escape($code) . "',
 ### Core Tables
 - `users` - id, username, password_hash, role (admin/accountant/viewer)
 - `company` - Single record with company settings
-- `periods` - Fiscal periods with open/locked status
 - `accounts` - Chart of accounts (code unique)
 - `journals` - VE (Sales), AC (Purchases), BK (Bank), OD (Misc)
-- `vat_rates` - VAT configurations with collected/deductible accounts
 
 ### Transaction Tables
-- `entries` - Accounting entry headers (draft/posted status)
+- `entries` - Accounting entry headers (always posted)
 - `entry_lines` - Individual debit/credit lines
-- `attachments` - File uploads linked to entries
-
-### Bank Module
-- `bank_accounts` - Bank account configuration
-- `bank_statements` - Imported statement headers
-- `bank_statement_lines` - Statement lines with matching status
 
 ### Auxiliary
-- `third_parties` - Customers and vendors
-- `lettering_groups` / `lettering_items` - Invoice/payment matching
+- `subscribers` - Newsletter subscribers
 - `audit_log` - Action tracking
 
 ## Business Rules
@@ -145,13 +136,9 @@ db_query("INSERT INTO accounts (code, label) VALUES ('" . db_escape($code) . "',
 - A line has either debit OR credit, not both
 
 ### Entry Workflow
-1. **Draft** - Editable, no piece number
-2. **Posted** - Immutable, has piece number, read-only
-
-### Period Rules
-- `open` - New entries allowed
-- `locked` - No modifications allowed
-- Entry date determines which period it belongs to
+- Entries are posted directly upon creation (no draft state)
+- Posted entries are immutable and have a piece number
+- Continuous accounting (no period restrictions)
 
 ### Piece Numbering
 Generated on validation: `{prefix}{YYYY}-{number:06d}`

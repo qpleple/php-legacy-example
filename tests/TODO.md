@@ -1,115 +1,37 @@
-# Test Suite - COMPLETE
+# Test Suite - Simplified
 
 ## Summary
 
-All tests created and passing. Integration tests removed (redundant with functional tests).
+Tests for the simplified accounting application (no periods, no drafts, no PDF, no bank, no lettering).
 
-| Suite | Test File | Tests | Assertions |
-|-------|-----------|-------|------------|
-| Unit | AuthTest.php, DbTest.php, UtilsTest.php | 83 | 117 |
-| Unit | LetteringLogicTest.php, LetteringIntegrationTest.php | 59 | 137 |
-| Functional | LoginTest.php | 8 | 20 |
-| Functional | EntriesTest.php | 20 | 83 |
-| Functional | ReportsTest.php | 27 | 115 |
-| Functional | SetupTest.php | 29 | 131 |
-| Functional | BankTest.php | 23 | 99 |
-| Functional | LettersTest.php | 12 | 46 |
-| Functional | CloseTest.php | 14 | 55 |
-| Functional | AdminTest.php | 11 | 49 |
-| **Total** | | **286** | **852** |
-
-## Import Tests Added
-
-Tests for CSV file upload functionality:
-
-### EntriesTest.php (+7 tests)
-- `testImportPageLoads` - Import page loads
-- `testImportPageHasForm` - Form has file input
-- `testImportPageShowsFormatInfo` - Shows CSV format documentation
-- `testImportCsvCreatesEntries` - CSV upload creates entries
-- `testImportCsvShowsCreatedCount` - Shows count of created entries
-- `testImportedEntryAppearsInList` - Imported entry visible in list
-- `testViewerCannotAccessImport` - Access control
-
-### BankTest.php (+8 tests)
-- `testImportPageShowsFormatInfo` - Shows CSV format documentation
-- `testImportCsvCreatesStatement` - CSV upload creates statement
-- `testImportCsvShowsLineCount` - Shows imported line count
-- `testImportCsvShowsReconcileLink` - Shows link to reconciliation
-- `testImportedStatementAppearsInList` - Statement visible in list
-- `testImportRequiresBankAccount` - Validation for bank account
-
-### SetupTest.php (+4 tests)
-- `testAccountsPageHasImportForm` - Import form present
-- `testImportAccountsCsv` - CSV upload imports accounts
-- `testImportedAccountsAppearInList` - Imported accounts visible
-
-## Test Fixtures
-
-| File | Purpose |
-|------|---------|
-| `fixtures/entries_import.csv` | Sample entries for import testing |
-| `fixtures/bank_statement.csv` | Sample bank statement for import testing |
-| `fixtures/chart_of_accounts.csv` | Sample accounts for import testing |
-
-## Lettering Sample Data Scenarios
-
-The database includes rich sample data for testing automatic lettering (`sql/04_lettering_samples.sql`):
-
-| Scenario | Third Party | Type | Description |
-|----------|-------------|------|-------------|
-| 1 | Leroy SARL | Customer | **1-to-1 exact match**: Invoice 2500 EUR, Payment 2500 EUR |
-| 2 | Moreau & Fils | Customer | **N-to-1 match**: 3 invoices (800+1200+500=2500), 1 payment 2500 |
-| 3 | Bernard SAS | Customer | **1-to-N match**: 1 invoice 3000, 3 payments (1000+1000+1000) |
-| 4 | Petit Industries | Customer | **Tolerance test**: Invoice 1500, Payment 1499.97 (within 0.05) |
-| 5 | Roux Consulting | Customer | **Unpaid**: 2 invoices (4200+1800) with no payments |
-| 6 | Tech Solutions | Vendor | **Partial payment**: 2 invoices (1800+2200=4000), payment 3000 |
-| 7 | Bureau Plus | Vendor | **1-to-1 exact match**: Invoice 960, Payment 960 |
-| 8 | LogiTrans | Vendor | **Unpaid**: 2 invoices (450+180) with no payments |
+| Suite | Test File | Description |
+|-------|-----------|-------------|
+| Unit | AuthTest.php | Authentication functions |
+| Unit | UtilsTest.php | Utility functions |
+| Functional | LoginTest.php | Login/logout flow |
+| Functional | EntriesTest.php | Entry list and view |
+| Functional | ReportsTest.php | Journal, ledger, trial balance |
+| Functional | SetupTest.php | Company, accounts, journals |
+| Functional | AdminTest.php | User management |
 
 ## Test Coverage by Module
 
-### entries/ (DONE)
-- [x] list.php - list, filters, delete draft, duplicate
-- [x] edit.php - new entry, view posted, edit draft
+### entries/
+- list.php - list, filters
+- edit.php - new entry form, view posted entry
 
-### reports/ (DONE)
-- [x] journal.php - report, filters, PDF link, totals
-- [x] ledger.php - report, filters, running balance
-- [x] trial_balance.php - report, soldes, balance status
-- [x] vat_summary.php - collected, deductible, amounts
-- [x] pdf_*.php - PDF generation (4 files)
+### reports/
+- journal.php - report, filters, totals
+- ledger.php - report, filters, running balance
+- trial_balance.php - report, soldes, balance status
 
-### setup/ (DONE)
-- [x] company.php - settings, form, admin only
-- [x] periods.php - list, generate button
-- [x] accounts.php - CRUD, search, validation
-- [x] journals.php - CRUD, admin only
-- [x] third_parties.php - CRUD, filter by type
-- [x] vat.php - CRUD, admin only
+### setup/
+- company.php - settings, form
+- accounts.php - CRUD, search
+- journals.php - CRUD
 
-### bank/ (DONE)
-- [x] accounts.php - list, create
-- [x] import.php - form, bank selector
-- [x] reconcile.php - statement lines, matched/unmatched
-
-### letters/ (DONE)
-- [x] select.php - third parties, accounts, totals
-- [x] letter.php - entry lines, form, balance
-
-### close/ (DONE)
-- [x] lock_period.php - periods, statistics, lock/unlock
-- [x] year_end.php - preconditions, errors, admin only
-
-### admin/ (DONE)
-- [x] users.php - CRUD, roles, self-protection, admin only
-
-## Access Control Tests
-
-All modules tested for proper role restrictions:
-- Admin pages require admin role
-- Accountant pages require accountant role
-- Viewer access properly restricted
+### admin/
+- users.php - CRUD, roles
 
 ## Run Tests
 
@@ -118,5 +40,8 @@ All modules tested for proper role restrictions:
 bash tests/run_all_tests.sh
 
 # Functional tests only
-./vendor/bin/phpunit --testsuite Functional
+cd tests && ./vendor/bin/phpunit --testsuite Functional
+
+# Unit tests only
+cd tests && ./vendor/bin/phpunit --testsuite Unit
 ```

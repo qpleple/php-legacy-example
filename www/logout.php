@@ -8,5 +8,5 @@ require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/utils.php';
 
 auth_logout();
-set_flash('success', 'Vous avez ete deconnecte.');
+set_flash('success', 'Vous avez été déconnecté.');
 redirect('/login.php');

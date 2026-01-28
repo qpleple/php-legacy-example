@@ -1,10 +1,8 @@
-# Ketchup Compta
+# 🍅 Ketchup Compta
 
 French accounting app built with 2006-era PHP patterns (intentionally legacy).
 
 ![Screenshot](docs/screenshot.jpg)
-
-
 
 ## Quick Start
 
@@ -13,12 +11,7 @@ docker-compose up -d
 open http://localhost:8080
 ```
 
-Logins:
-| User | Password | Role |
-|------|----------|------|
-| `admin` | `admin123` | Administrator |
-| `comptable` | `comptable123` | Accountant |
-| `lecteur` | `lecteur123` | Viewer |
+Login: `admin` / `admin123`
 
 ## Run Tests
 

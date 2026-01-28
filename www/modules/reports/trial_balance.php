@@ -5,20 +5,10 @@
 
 $page_title = 'Balance';
 require_once __DIR__ . '/../../header.php';
-require_role('accountant');
-
-// Filters
-$period_id = get('period_id', '');
-
-// Get periods for filter
-$periods = get_periods();
+require_login();
 
 // Build query conditions
 $where = "e.status = 'posted'";
-if ($period_id) {
-    $period_id = intval($period_id);
-    $where .= " AND e.period_id = $period_id";
-}
 
 // Get trial balance data
 $sql = "SELECT a.code, a.label, a.type,
@@ -51,44 +41,24 @@ foreach ($balance as &$row) {
 unset($row);
 ?>
 
-<h2>Balance Generale</h2>
-
-<!-- Filters -->
-<div class="filters">
-    <form method="get" action="">
-        <label>Periode:</label>
-        <select name="period_id">
-            <option value="">Toutes periodes</option>
-            <?php foreach ($periods as $p): ?>
-            <option value="<?php echo $p['id']; ?>" <?php echo get('period_id') == $p['id'] ? 'selected' : ''; ?>>
-                <?php echo format_date($p['start_date']) . ' - ' . format_date($p['end_date']); ?>
-            </option>
-            <?php endforeach; ?>
-        </select>
-
-        <button type="submit" class="btn btn-small">Afficher</button>
-        <a href="/modules/reports/trial_balance.php" class="btn btn-small">Reset</a>
-        <a href="/modules/reports/pdf_trial_balance.php?<?php echo http_build_query($_GET); ?>" class="btn btn-small" target="_blank">PDF</a>
-        <button type="button" class="btn btn-small btn-print">Imprimer</button>
-    </form>
-</div>
+<h2>Balance Générale</h2>
 
 <!-- Summary -->
 <div class="dashboard-row mb-20">
     <div class="stat-box">
-        <h3>Total Mouvements Debit</h3>
+        <h3>Total Mouvements Débit</h3>
         <p class="big-number"><?php echo format_money($grand_debit); ?></p>
     </div>
     <div class="stat-box">
-        <h3>Total Mouvements Credit</h3>
+        <h3>Total Mouvements Crédit</h3>
         <p class="big-number"><?php echo format_money($grand_credit); ?></p>
     </div>
     <div class="stat-box">
-        <h3>Total Soldes Debiteurs</h3>
+        <h3>Total Soldes Débiteurs</h3>
         <p class="big-number"><?php echo format_money($grand_solde_debit); ?></p>
     </div>
     <div class="stat-box">
-        <h3>Total Soldes Crediteurs</h3>
+        <h3>Total Soldes Créditeurs</h3>
         <p class="big-number"><?php echo format_money($grand_solde_credit); ?></p>
     </div>
 </div>
@@ -99,11 +69,11 @@ unset($row);
     <thead>
         <tr>
             <th>Compte</th>
-            <th>Libelle</th>
-            <th>Total Debit</th>
-            <th>Total Credit</th>
-            <th>Solde Debit</th>
-            <th>Solde Credit</th>
+            <th>Libellé</th>
+            <th>Total Débit</th>
+            <th>Total Crédit</th>
+            <th>Solde Débit</th>
+            <th>Solde Crédit</th>
         </tr>
     </thead>
     <tbody>
@@ -131,13 +101,13 @@ unset($row);
 
 <p class="mt-10">
     <?php if (abs($grand_solde_debit - $grand_solde_credit) <= 0.01): ?>
-    <span style="color: green;">Balance equilibree</span>
+    <span style="color: green;">Balance équilibrée</span>
     <?php else: ?>
-    <span style="color: red;">Attention: ecart de <?php echo format_money(abs($grand_solde_debit - $grand_solde_credit)); ?></span>
+    <span style="color: red;">Attention : écart de <?php echo format_money(abs($grand_solde_debit - $grand_solde_credit)); ?></span>
     <?php endif; ?>
 </p>
 <?php else: ?>
-<p>Aucune donnee pour les criteres selectionnes.</p>
+<p>Aucune donnée pour les critères sélectionnés.</p>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../../footer.php'; ?>

@@ -1,150 +1,89 @@
 <?php
 /**
- * Dashboard / Index page - Legacy style
+ * Landing page - Public page with newsletter subscription
  */
 
 require_once __DIR__ . '/lib/db.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/utils.php';
 
-require_login();
+auth_start_session();
 
-$page_title = 'Tableau de bord';
-require_once __DIR__ . '/header.php';
+// If logged in, redirect to dashboard
+if (auth_is_logged_in()) {
+    redirect('/dashboard.php');
+}
 
-// Get company info
-$company = get_company();
+$success = '';
+$error = '';
 
-// Get current period
-$today = date('Y-m-d');
-$current_period = get_period_for_date($today);
+// Handle newsletter subscription
+if (is_post()) {
+    $email = trim(post('email'));
 
-// Statistics
-// Draft entries
-$sql = "SELECT COUNT(*) as count FROM entries WHERE status = 'draft'";
-$result = db_query($sql);
-$draft_count = db_fetch_assoc($result)['count'];
+    // Validate email
+    if (empty($email)) {
+        $error = 'Veuillez entrer une adresse email.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Adresse email invalide.';
+    } else {
+        // Check if already subscribed
+        $email_escaped = db_escape($email);
+        $sql = "SELECT id FROM subscribers WHERE email = '$email_escaped'";
+        $result = db_query($sql);
 
-// Posted entries this month
-$month_start = date('Y-m-01');
-$month_end = date('Y-m-t');
-$sql = "SELECT COUNT(*) as count FROM entries WHERE status = 'posted' AND entry_date BETWEEN '$month_start' AND '$month_end'";
-$result = db_query($sql);
-$posted_this_month = db_fetch_assoc($result)['count'];
-
-// Unmatched bank lines
-$sql = "SELECT COUNT(*) as count FROM bank_statement_lines WHERE status = 'unmatched'";
-$result = db_query($sql);
-$unmatched_bank = db_fetch_assoc($result)['count'];
-
-// Recent entries
-$sql = "SELECT e.*, j.code as journal_code, u.username as created_by_name
-        FROM entries e
-        LEFT JOIN journals j ON e.journal_id = j.id
-        LEFT JOIN users u ON e.created_by = u.id
-        ORDER BY e.created_at DESC LIMIT 10";
-$recent_entries = db_fetch_all(db_query($sql));
+        if (db_num_rows($result) > 0) {
+            $error = 'Cette adresse email est déjà inscrite.';
+        } else {
+            // Insert subscriber
+            $now = date('Y-m-d H:i:s');
+            $sql = "INSERT INTO subscribers (email, created_at) VALUES ('$email_escaped', '$now')";
+            db_query($sql);
+            $success = 'Merci pour votre inscription !';
+        }
+    }
+}
 ?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ketchup Compta - Logiciel de comptabilité</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    <div id="login-wrapper">
+        <div id="login-box">
+            <h1>Ketchup Compta</h1>
+            <p class="hint" style="margin-top: 0; margin-bottom: 20px;">Logiciel de comptabilité en partie double</p>
 
-<h2>Tableau de bord</h2>
+            <div class="form-group" style="text-align: center;">
+                <a href="/login.php" class="btn btn-primary" style="display: block; padding: 10px;">Se connecter</a>
+            </div>
 
-<div class="dashboard">
-    <div class="dashboard-row">
-        <div class="stat-box">
-            <h3>Exercice</h3>
-            <?php if ($company): ?>
-            <p><?php echo format_date($company['fiscal_year_start']); ?> - <?php echo format_date($company['fiscal_year_end']); ?></p>
-            <?php else: ?>
-            <p>Non configure</p>
+            <hr style="margin: 25px 0; border: none; border-top: 1px solid #ccc;">
+
+            <h3 style="text-align: center; margin-bottom: 15px;">Restez informé</h3>
+            <p class="hint" style="margin-top: 0; margin-bottom: 15px;">Inscrivez-vous à notre newsletter</p>
+
+            <?php if ($success): ?>
+            <div class="flash flash-success"><?php echo h($success); ?></div>
             <?php endif; ?>
-        </div>
 
-        <div class="stat-box">
-            <h3>Periode courante</h3>
-            <?php if ($current_period): ?>
-            <p>
-                <?php echo $current_period['status'] === 'open' ? 'Ouverte' : 'Verrouillee'; ?>
-            </p>
-            <?php else: ?>
-            <p>Aucune periode active</p>
+            <?php if ($error): ?>
+            <div class="flash flash-error"><?php echo h($error); ?></div>
             <?php endif; ?>
-        </div>
 
-        <div class="stat-box">
-            <h3>Brouillons</h3>
-            <p class="big-number"><?php echo $draft_count; ?></p>
-            <?php if ($draft_count > 0): ?>
-            <a href="/modules/entries/list.php?status=draft">Voir</a>
-            <?php endif; ?>
-        </div>
-
-        <div class="stat-box">
-            <h3>Ecritures ce mois</h3>
-            <p class="big-number"><?php echo $posted_this_month; ?></p>
-        </div>
-
-        <div class="stat-box">
-            <h3>Lignes banque non pointees</h3>
-            <p class="big-number"><?php echo $unmatched_bank; ?></p>
-            <?php if ($unmatched_bank > 0): ?>
-            <a href="/modules/bank/reconcile.php">Pointer</a>
-            <?php endif; ?>
+            <form method="post" action="">
+                <div class="form-group">
+                    <label for="email">Adresse email :</label>
+                    <input type="email" id="email" name="email" value="<?php echo h(post('email')); ?>" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success" style="width: 100%;">S'inscrire</button>
+                </div>
+            </form>
         </div>
     </div>
-
-    <div class="dashboard-section">
-        <h3>Actions rapides</h3>
-        <ul class="quick-actions">
-            <li><a href="/modules/entries/edit.php" class="btn">Nouvelle ecriture</a></li>
-            <li><a href="/modules/entries/import.php" class="btn">Import CSV</a></li>
-            <li><a href="/modules/bank/import.php" class="btn">Import releve bancaire</a></li>
-            <li><a href="/modules/reports/trial_balance.php" class="btn">Balance</a></li>
-        </ul>
-    </div>
-
-    <div class="dashboard-section">
-        <h3>Dernieres ecritures</h3>
-        <?php if (count($recent_entries) > 0): ?>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Journal</th>
-                    <th>N&deg;</th>
-                    <th>Libelle</th>
-                    <th>Debit</th>
-                    <th>Credit</th>
-                    <th>Statut</th>
-                    <th>Par</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($recent_entries as $entry): ?>
-                <tr>
-                    <td><?php echo format_date($entry['entry_date']); ?></td>
-                    <td><?php echo h($entry['journal_code']); ?></td>
-                    <td>
-                        <a href="/modules/entries/edit.php?id=<?php echo $entry['id']; ?>">
-                            <?php echo $entry['piece_number'] ? h($entry['piece_number']) : '(brouillon)'; ?>
-                        </a>
-                    </td>
-                    <td><?php echo h($entry['label']); ?></td>
-                    <td class="number"><?php echo format_money($entry['total_debit']); ?></td>
-                    <td class="number"><?php echo format_money($entry['total_credit']); ?></td>
-                    <td>
-                        <span class="status-<?php echo $entry['status']; ?>">
-                            <?php echo $entry['status'] === 'draft' ? 'Brouillon' : 'Valide'; ?>
-                        </span>
-                    </td>
-                    <td><?php echo h($entry['created_by_name']); ?></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-        <?php else: ?>
-        <p>Aucune ecriture pour le moment.</p>
-        <?php endif; ?>
-    </div>
-</div>
-
-<?php require_once __DIR__ . '/footer.php'; ?>
+</body>
+</html>
