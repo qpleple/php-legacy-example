@@ -163,17 +163,6 @@ Example: `VE2024-000001`
 3. Update HTML table columns
 4. Create matching `pdf_*.php` for PDF export
 
-### Creating PDF Export
-```php
-require_once '../../lib/pdf/fpdf.php';
-
-$pdf = new FPDF();
-$pdf->AddPage();
-$pdf->SetFont('Arial', 'B', 16);
-$pdf->Cell(0, 10, 'Report Title', 0, 1, 'C');
-// Add content...
-$pdf->Output('I', 'filename.pdf');
-```
 
 ## Testing Changes
 
@@ -193,7 +182,6 @@ $pdf->Output('I', 'filename.pdf');
 | CSS styles | `www/assets/css/style.css` |
 | JavaScript | `www/assets/js/app.js` |
 | User uploads | `www/uploads/` |
-| Generated PDFs | `www/pdf/` |
 | Database schema | `sql/01_schema.sql` |
 | Seed data | `sql/02_seed.sql` |
 | SQLite database | `www/data/compta.db` (in container) |
