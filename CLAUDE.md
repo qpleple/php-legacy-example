@@ -126,7 +126,6 @@ db_query("INSERT INTO accounts (code, label) VALUES ('" . db_escape($code) . "',
 - `entry_lines` - Individual debit/credit lines
 
 ### Auxiliary
-- `subscribers` - Newsletter subscribers
 - `audit_log` - Action tracking
 
 ## Business Rules

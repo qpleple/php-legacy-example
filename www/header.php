@@ -62,7 +62,6 @@ $page_title = isset($page_title) ? $page_title : 'Ketchup Compta';
                         <li><a href="/modules/setup/accounts.php">Plan comptable</a></li>
                         <li><a href="/modules/setup/journals.php">Journaux</a></li>
                         <li><a href="/modules/admin/users.php">Utilisateurs</a></li>
-                        <li><a href="/modules/admin/subscribers.php">Abonnés Newsletter</a></li>
                     </ul>
                 </li>
             </ul>

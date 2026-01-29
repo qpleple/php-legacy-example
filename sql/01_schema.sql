@@ -85,10 +85,3 @@ CREATE TABLE IF NOT EXISTS audit_log (
 CREATE INDEX IF NOT EXISTS idx_audit_log_user ON audit_log (user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log (action);
 CREATE INDEX IF NOT EXISTS idx_audit_log_entity ON audit_log (entity, entity_id);
-
--- Newsletter subscribers
-CREATE TABLE IF NOT EXISTS subscribers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL UNIQUE,
-    created_at TEXT NOT NULL
-);
