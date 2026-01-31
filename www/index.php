@@ -1,17 +1,18 @@
 <?php
 /**
- * Landing page - Public welcome page
+ * Landing page - Public welcome page (no auth, no db, no session)
  */
 
-require_once __DIR__ . '/lib/auth.php';
-require_once __DIR__ . '/lib/utils.php';
+$version = trim(@file_get_contents(__DIR__ . '/VERSION')) ?: '1.0.0';
+$year = date('Y');
 
-auth_start_session();
-
-// If logged in, redirect to dashboard
-if (auth_is_logged_in()) {
-    redirect('/dashboard.php');
-}
+$taglines = [
+    'Logiciel de comptabilité en partie double',
+    'Votre comptabilité, simplifiée',
+    'La compta sans prise de tête',
+    'Gérez vos comptes en toute sérénité',
+];
+$tagline = $taglines[array_rand($taglines)];
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -26,7 +27,7 @@ if (auth_is_logged_in()) {
             <div style="text-align: center; margin-bottom: 25px;">
                 <span style="font-size: 48px;">🍅</span>
                 <h1 style="margin-top: 10px;">Ketchup Compta</h1>
-                <p class="hint" style="margin-top: 5px;">Logiciel de comptabilité en partie double</p>
+                <p class="hint" style="margin-top: 5px;"><?= htmlspecialchars($tagline) ?></p>
             </div>
 
             <div class="form-group" style="text-align: center;">
@@ -57,7 +58,7 @@ if (auth_is_logged_in()) {
             </div>
 
             <p class="hint" style="font-size: 11px; text-align: center; color: #999;">
-                Version 1.0
+                Version <?= htmlspecialchars($version) ?> · © <?= $year ?> Ketchup Compta
             </p>
         </div>
     </div>
