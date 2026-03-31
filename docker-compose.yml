@@ -6,9 +6,5 @@ services:
     volumes:
       - ./www:/var/www/html
       - ./sql:/var/www/sql
-      - sqlite_data:/var/www/html/data
     environment:
       - SQLITE_DB=/var/www/html/data/compta.db
-
-volumes:
-  sqlite_data:
